@@ -160,25 +160,53 @@ User:
 
 This is the heart of the app and the focus of the MVP.
 
-### Input assembly
-1. Take user's garden profile (postcode at minimum)
-2. Fetch current weather forecast for their location (Met Office API)
-3. Determine current week/season
-4. If postcode only: LLM infers likely soil type, suggests common local plants
-5. Assemble a structured prompt with all available context
+### MVP flow (step by step)
 
-### Prompt structure
+```
+User enters postcode (e.g. "SE15 4QN")
+        │
+        ▼
+Step 1: Validate postcode
+        Regex: ^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$
+        │
+        ▼
+Step 2: Geocode via postcodes.io
+        GET https://api.postcodes.io/postcodes/SE154QN
+        → lat/lon, region (e.g. "London"), county, admin district
+        │
+        ▼
+Step 3: Fetch weather forecast
+        GET https://data.hub.api.metoffice.gov.uk/sitespecific/v0/point/hourly
+            ?latitude=51.47&longitude=-0.06
+        → 5-7 day forecast (temp, rain, wind, frost risk)
+        │
+        ▼
+Step 4: Get typical plants for region (CACHED)
+        Cache key: region + season (e.g. "London:autumn")
+        Cache miss → LLM call: "What plants are commonly grown in
+            domestic gardens in {region} in {season}? Return as JSON list."
+        Cache hit → skip LLM call, use cached list
+        │
+        ▼
+Step 5: Generate recommendations (LLM call)
+        Combine: weather + regional plant list + date/season
+        → Structured JSON todo list
+```
+
+The regional plant list cache avoids repeated LLM calls. Region granularity (from postcodes.io `region` field — ~12 UK regions) is coarse enough to cache efficiently but specific enough to be useful. The user refines their actual plant list via the feedback loop.
+
+### Prompt structure (Step 5)
 ```
 System: You are an expert UK gardener and horticulturist. Generate a prioritised
 weekly action list for this gardener based on their specific situation.
 
 Context:
-- Location: {postcode}, {inferred_region}
+- Location: {postcode}, region: {region}
 - Current date: {date}, Week {week_number}
 - Weather forecast (next 7 days): {forecast_summary}
 - Garden: {orientation}, {shade_level}, {size}
-- Soil type: {soil_type or "inferred from postcode: likely {type}"}
-- Plants: {plant_list or "not specified — suggest common plants for this area"}
+- Soil type: {soil_type or "not specified"}
+- Plants: {user_plant_list or regional_default_plants}
 - Experience level: {level}
 - Confirmed inferences: {confirmed_inferences or "none yet"}
 - Rejected inferences: {rejected_inferences or "none yet"}
@@ -193,6 +221,17 @@ Generate:
 5. Include any inferences you made about the garden in the "inferences" field so the user can confirm or correct them
 6. Do not re-suggest tasks the user has already completed this season unless a repeat is genuinely needed
 ```
+
+### Regional plant list prompt (Step 4, cached)
+```
+System: You are an expert UK horticulturist.
+
+List 20-30 plants commonly grown in domestic gardens in {region} during {season}.
+Include a mix of vegetables, herbs, flowers, and shrubs typical for the area.
+Return as a JSON array of objects: [{"name": "...", "type": "vegetable|herb|flower|shrub|tree"}]
+```
+
+Cache strategy (MVP): simple JSON file on disk keyed by `{region}:{season}`. ~12 regions × 4 seasons = ~48 entries max. Upgrade to Redis/DB when needed.
 
 ### Output format
 Structured JSON response:
@@ -320,10 +359,18 @@ This "value before signup" approach means the first screen is just a postcode in
 1. **FastAPI app** with a single endpoint: `POST /recommendations`
    - Accepts: `{ postcode, plants?, orientation?, shade?, soil_type?, experience_level? }`
    - Returns: structured JSON todo list
-2. **Met Office API integration** — fetch 5-day forecast by postcode
-3. **Postcode → coordinates lookup** — using postcodes.io (free, no auth)
-4. **LLM orchestration** — assemble prompt, call OpenAI-compatible API, parse structured response
-5. **Config** — environment-based switching between Ollama (dev) and cloud API (prod)
+2. **Postcode validation** — regex check before any API calls
+3. **Postcode → coordinates + region** — postcodes.io lookup (free, no auth)
+4. **Weather forecast** — Met Office DataHub or Open-Meteo, queried by lat/lon
+5. **Regional plant list** — LLM generates common plants for the region + season, cached as JSON file (~48 entries: 12 regions × 4 seasons)
+6. **Recommendation generation** — LLM combines weather + plant list + date to produce structured todo list
+7. **Config** — environment-based switching between Ollama (dev) and cloud API (prod)
+
+### Two LLM calls per request (worst case):
+1. Regional plant list (cache miss only) — generic, reusable across all users in that region
+2. Personalised recommendations — unique per request, uses weather + plants + user context
+
+On cache hit, only one LLM call is needed.
 
 ### What to defer:
 - User accounts and database
@@ -331,6 +378,7 @@ This "value before signup" approach means the first screen is just a postcode in
 - Email sending
 - Background job scheduling
 - Soil/pest/plant database integrations
+- Feedback loops (inference confirmation, task completion) — designed but require accounts/persistence
 
 ### Dev environment:
 - Ollama running locally with a capable model (e.g. llama3, mistral)
