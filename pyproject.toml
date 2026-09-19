@@ -1,0 +1,13 @@
+[project]
+name = "garden-todo"
+version = "0.1.0"
+description = "Personalised gardening recommendations for UK gardeners"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "openai",
+    "pydantic-settings",
+    "python-dotenv",
+]
