@@ -118,20 +118,35 @@
       max-width: 31ch;
     }
 
-    /* Form */
-    .form-shell {
+    /* Onboarding */
+    .onboard-shell {
       background: var(--card);
       border-radius: 28px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 28px 24px;
       border: 1px solid var(--line);
+      text-align: center;
     }
 
-    .input-row {
+    .onboard-shell h2 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .onboard-shell p {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-bottom: 20px;
+    }
+
+    .onboard-shell .input-row {
       display: flex;
       gap: 10px;
     }
 
+    /* Form elements */
     input[type="text"] {
       flex: 1;
       padding: 10px 14px;
@@ -341,9 +356,7 @@
       height: 56px;
     }
 
-    .ring-wrap svg {
-      transform: rotate(-90deg);
-    }
+    .ring-wrap svg { transform: rotate(-90deg); }
 
     .ring-track { stroke: var(--line); fill: none; }
     .ring-arc { stroke: var(--sage); fill: none; stroke-linecap: round; transition: stroke-dasharray 0.4s ease; }
@@ -391,9 +404,7 @@
       border: 1px solid var(--line);
     }
 
-    .lead-kicker {
-      padding: 18px 20px 0;
-    }
+    .lead-kicker { padding: 18px 20px 0; }
 
     .lead-img {
       width: 100%;
@@ -435,9 +446,7 @@
       margin-bottom: 16px;
     }
 
-    .why-now-label {
-      margin-bottom: 6px;
-    }
+    .why-now-label { margin-bottom: 6px; }
 
     .why-now-text {
       font-size: 13px;
@@ -882,23 +891,28 @@
       <div class="masthead-content">
         <div class="masthead-meta">
           <span class="mono" id="masthead-week"></span>
-          <span class="mono" id="masthead-location"></span>
+          <span class="mono" id="masthead-location">{% if user %}{{ user.location.admin_district or user.location.region }}{% endif %}</span>
         </div>
         <h1>This Week in<br><em>the Garden</em></h1>
-        <p class="masthead-summary" id="masthead-summary">Personalised gardening actions for your week</p>
+        <p class="masthead-summary" id="masthead-summary">
+          {% if user %}Loading your garden plan...{% else %}Personalised gardening actions for your week{% endif %}
+        </p>
       </div>
     </div>
 
-    <!-- Form -->
-    <div class="form-shell">
-      <form id="form">
+    {% if not user %}
+    <!-- Onboarding -->
+    <div class="onboard-shell">
+      <h2>Set up your garden</h2>
+      <p>Enter your postcode to get started with personalised weekly actions.</p>
+      <form action="/onboard" method="POST">
         <div class="input-row">
-          <input type="text" id="postcode" name="postcode" placeholder="Enter your postcode" autocomplete="postal-code" required>
-          <button type="submit" id="submit-btn" class="btn">Go</button>
+          <input type="text" name="postcode" placeholder="e.g. SE15 4QN" autocomplete="postal-code" required>
+          <button type="submit" class="btn">Get started</button>
         </div>
       </form>
     </div>
-
+    {% else %}
     <!-- SSE Progress -->
     <div id="progress">
       <div class="progress-card">
@@ -919,9 +933,16 @@
       <button class="debug-toggle" id="debug-toggle-btn">Debug info</button>
       <div id="debug-content" style="display:none"></div>
     </div>
+    {% endif %}
   </div>
 
+  {% if user %}
   <script>
+    const USER_POSTCODE = {{ user.postcode | tojson }};
+    const USER_LOCATION = {{ (user.location.admin_district or user.location.region) | tojson }};
+    const INITIAL_TASK_STATE = {{ task_state | tojson }};
+    const CURRENT_WEEK = {{ week | tojson }};
+
     const PIPELINE_STEPS = [
       'Validating postcode',
       'Looking up location',
@@ -934,9 +955,6 @@
 
     const SHOW_DEBUG = new URLSearchParams(window.location.search).has('debug');
 
-    const form = document.getElementById('form');
-    const postcodeInput = document.getElementById('postcode');
-    const submitBtn = document.getElementById('submit-btn');
     const progressEl = document.getElementById('progress');
     const barEl = document.getElementById('bar');
     const stepsEl = document.getElementById('steps');
@@ -951,50 +969,10 @@
 
     let debugData = {};
     let weatherDays = [];
-    let locationName = '';
-    let taskState = {};
-    let currentWeek = '';
-    let currentPostcode = '';
+    let taskState = Object.assign({}, INITIAL_TASK_STATE);
     let allActions = [];
     let plantLookup = {};
 
-    // localStorage helpers
-    function stateKey() { return 'garden_' + currentPostcode.replace(/\s/g,'_').toLowerCase() + '_' + currentWeek; }
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(stateKey());
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          taskState = parsed.tasks || {};
-          return;
-        }
-      } catch(e) {}
-      taskState = {};
-    }
-
-    function saveState() {
-      try {
-        const history = loadHistory();
-        const total = allActions.length;
-        const done = Object.values(taskState).filter(v => v === 'done').length;
-        const idx = history.findIndex(h => h.week === currentWeek);
-        if (idx >= 0) history[idx] = { week: currentWeek, done, total };
-        else history.push({ week: currentWeek, done, total });
-        if (history.length > 8) history.splice(0, history.length - 8);
-        localStorage.setItem(stateKey(), JSON.stringify({ tasks: taskState, history }));
-      } catch(e) {}
-    }
-
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem(stateKey());
-        if (raw) return JSON.parse(raw).history || [];
-      } catch(e) {}
-      return [];
-    }
-
-    // Season helper
     function seasonLabel() {
       const m = new Date().getMonth() + 1;
       const seasons = { spring: [3,4,5], summer: [6,7,8], autumn: [9,10,11], winter: [12,1,2] };
@@ -1006,7 +984,6 @@
       return pos + ' ' + season;
     }
 
-    // Week number
     function isoWeek(d) {
       const date = new Date(d);
       date.setHours(0,0,0,0);
@@ -1014,6 +991,8 @@
       const week1 = new Date(date.getFullYear(), 0, 4);
       return 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
     }
+
+    mastheadWeek.textContent = 'Week ' + isoWeek(new Date()) + ' · ' + seasonLabel();
 
     debugToggleBtn.addEventListener('click', () => {
       if (debugContent.style.display === 'none') {
@@ -1025,30 +1004,29 @@
       }
     });
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const postcode = postcodeInput.value.trim();
-      if (!postcode) return;
+    function persistTaskState(priority, status) {
+      const doneCount = Object.values(taskState).filter(v => v === 'done').length;
+      fetch('/api/task-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priority: priority,
+          status: status,
+          done_count: doneCount,
+          total_count: allActions.length,
+        }),
+      });
+    }
 
-      currentPostcode = postcode;
-      submitBtn.disabled = true;
+    function startStream() {
       progressEl.classList.add('active');
       resultsEl.classList.remove('active');
       resultsEl.innerHTML = '';
       errorEl.innerHTML = '';
       stepsEl.innerHTML = '';
       barEl.style.width = '0%';
-      debugPanel.classList.remove('active');
-      debugContent.innerHTML = '';
-      debugContent.style.display = 'none';
-      debugToggleBtn.textContent = 'Debug info';
-      debugData = {};
-      weatherDays = [];
 
-      const wn = isoWeek(new Date());
-      mastheadWeek.textContent = 'Week ' + wn + ' · ' + seasonLabel();
-
-      const source = new EventSource('/recommendations/stream?postcode=' + encodeURIComponent(postcode));
+      const source = new EventSource('/recommendations/stream');
 
       source.addEventListener('step', (e) => {
         const data = JSON.parse(e.data);
@@ -1070,10 +1048,6 @@
       source.addEventListener('debug', (e) => {
         const data = JSON.parse(e.data);
         debugData[data.section] = data.data;
-        if (data.section === 'geocode' && data.data) {
-          locationName = data.data.admin_district || data.data.region || '';
-          mastheadLocation.textContent = locationName;
-        }
         if (data.section === 'weather' && data.data && data.data.raw_days) {
           weatherDays = data.data.raw_days;
         }
@@ -1094,7 +1068,6 @@
           const data = JSON.parse(e.data);
           renderResults(data);
           if (SHOW_DEBUG) renderDebugPanel();
-          submitBtn.disabled = false;
         }, 500);
       });
 
@@ -1107,9 +1080,8 @@
         }
         source.close();
         progressEl.classList.remove('active');
-        submitBtn.disabled = false;
       });
-    });
+    }
 
     function buildPlantLookup(plants) {
       const lookup = {};
@@ -1155,8 +1127,6 @@
       resultsEl.classList.add('active');
       plantLookup = buildPlantLookup(data.regional_plants);
       allActions = data.actions || [];
-      currentWeek = data.week || '';
-      loadState();
 
       if (data.summary) {
         mastheadSummary.textContent = data.summary;
@@ -1164,15 +1134,12 @@
 
       let html = '';
 
-      // Forecast strip
       if (weatherDays.length > 0) {
         html += renderForecastStrip(weatherDays);
       }
 
-      // Completion ring
       html += '<div id="completion-area"></div>';
 
-      // Split actions by state
       const live = [];
       const done = [];
       const deferred = [];
@@ -1183,12 +1150,10 @@
         else live.push(action);
       }
 
-      // Lead task
       if (live.length > 0) {
         html += renderLeadTask(live[0]);
       }
 
-      // Remaining tasks
       if (live.length > 1) {
         html += '<div class="task-divider"><span class="mono">Then, when you have time</span></div>';
         for (let i = 1; i < live.length; i++) {
@@ -1196,32 +1161,26 @@
         }
       }
 
-      // Done panel
       html += '<div id="done-panel"></div>';
-      // Deferred panel
       html += '<div id="deferred-panel"></div>';
 
-      // Inferences
       if (data.inferences && data.inferences.length > 0) {
         html += renderInferences(data.inferences);
       }
 
-      // Plant suggestions
       if (data.plant_suggestions && data.plant_suggestions.length > 0) {
         html += renderPlantSuggestions(data.plant_suggestions);
       }
 
-      // Note
       if (data.notes) {
-        const weekNum = currentWeek.replace(/.*W/, '');
+        const weekNum = CURRENT_WEEK.replace(/.*W/, '');
         html += '<div class="note-panel">'
           + '<p class="note-text">' + esc(data.notes) + '</p>'
           + '<span class="mono">Note for week ' + esc(weekNum) + '</span>'
           + '</div>';
       }
 
-      // Footer
-      html += '<div class="footer"><span class="mono">Met Office · postcodes.io · ' + esc(currentPostcode.toUpperCase()) + '</span></div>';
+      html += '<div class="footer"><span class="mono">Met Office · postcodes.io · ' + esc(USER_POSTCODE) + '</span></div>';
 
       resultsEl.innerHTML = html;
       renderCompletionRing();
@@ -1279,23 +1238,9 @@
       if (doneCount > 0 && doneCount < total) msg = doneCount + ' of ' + total + ' done. Keep going.';
       if (doneCount === total && total > 0) msg = 'Week complete. Well gardened.';
 
-      const history = loadHistory();
       let histHtml = '<div class="history-strip">';
-      for (let i = Math.max(0, history.length - 8); i < history.length; i++) {
-        const h = history[i];
-        const isCurrent = h.week === currentWeek;
-        const opacity = h.total > 0 ? Math.max(0.2, h.done / h.total) : 0.2;
-        const style = isCurrent ? '' : ' style="opacity:' + opacity + '"';
-        histHtml += '<div class="history-seg' + (isCurrent ? ' current' : '') + '"' + style + '></div>';
-      }
-      if (history.length === 0) {
-        histHtml += '<div class="history-seg current"></div>';
-      }
+      histHtml += '<div class="history-seg current"></div>';
       histHtml += '</div>';
-
-      let lifetime = 0;
-      for (const h of history) lifetime += h.done;
-      lifetime += doneCount;
 
       area.innerHTML = '<div class="completion-row">'
         + '<div class="ring-wrap">'
@@ -1310,7 +1255,7 @@
         + '<div class="completion-info">'
         + '<div class="completion-line">' + msg + '</div>'
         + histHtml
-        + '<span class="mono">' + lifetime + ' tasks lifetime</span>'
+        + '<span class="mono">' + doneCount + ' tasks lifetime</span>'
         + '</div>'
         + '</div>';
     }
@@ -1418,7 +1363,6 @@
         deferPanel.innerHTML = '';
       }
 
-      // Wire panel toggles and undo buttons
       document.querySelectorAll('.panel-header').forEach(h => {
         h.addEventListener('click', () => {
           h.classList.toggle('open');
@@ -1440,7 +1384,8 @@
           else if (act === 'defer') taskState[p] = 'deferred';
           else if (act === 'skip') taskState[p] = 'skipped';
           else if (act === 'undo') delete taskState[p];
-          saveState();
+          const status = act === 'undo' ? null : taskState[p];
+          persistTaskState(p, status);
           rerender();
         };
       });
@@ -1450,7 +1395,7 @@
           e.stopPropagation();
           const p = parseInt(btn.dataset.p);
           taskState[p] = 'done';
-          saveState();
+          persistTaskState(p, 'done');
           rerender();
         };
       });
@@ -1458,16 +1403,11 @@
 
     function rerender() {
       const live = [];
-      const doneActions = [];
-      const deferredActions = [];
       for (const action of allActions) {
         const st = taskState[action.priority];
-        if (st === 'done') doneActions.push(action);
-        else if (st === 'deferred' || st === 'skipped') deferredActions.push(action);
-        else live.push(action);
+        if (!st) live.push(action);
       }
 
-      // Rebuild live task area
       let liveHtml = '';
       if (live.length > 0) {
         liveHtml += renderLeadTask(live[0]);
@@ -1479,20 +1419,17 @@
         }
       }
 
-      // Find the lead task in results and replace up to done-panel
       const leadEl = resultsEl.querySelector('.lead-task');
       const divider = resultsEl.querySelector('.task-divider');
       const taskRows = resultsEl.querySelectorAll('.task-row');
       const doneP = document.getElementById('done-panel');
 
-      // Remove old live tasks
       const toRemove = [];
       if (leadEl) toRemove.push(leadEl);
       if (divider) toRemove.push(divider);
       taskRows.forEach(r => toRemove.push(r));
       toRemove.forEach(el => el.remove());
 
-      // Insert new live tasks before done-panel
       if (doneP) {
         const temp = document.createElement('div');
         temp.innerHTML = liveHtml;
@@ -1533,7 +1470,6 @@
         html += renderPlantRow(suggestions[i]);
       }
 
-      // Hidden extras
       if (total > showCount) {
         html += '<div id="extra-plants" style="display:none">';
         for (let i = showCount; i < total; i++) {
@@ -1621,7 +1557,6 @@
         + '</div>';
     }
 
-    // Wire up "See all" button (delegated)
     document.addEventListener('click', (e) => {
       if (e.target.id === 'see-all-plants') {
         const extra = document.getElementById('extra-plants');
@@ -1638,6 +1573,10 @@
       el.textContent = s;
       return el.innerHTML;
     }
+
+    // Auto-start the stream on page load
+    startStream();
   </script>
+  {% endif %}
 </body>
 </html>

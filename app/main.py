@@ -3,9 +3,10 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from app.cache import get_regional_plants, _enrich_plant
 from app.geocode import geocode_postcode
@@ -17,6 +18,7 @@ from app.prompts import (
     current_season,
 )
 from app.llm import generate_json
+from app.user import load_user, create_user, set_task_status, update_history, get_task_state, current_week
 from app.weather import fetch_forecast, summarise_forecast
 
 import re
@@ -72,7 +74,57 @@ async def health():
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+    user = load_user()
+    return templates.TemplateResponse(request, "index.html", {
+        "user": user,
+        "week": current_week(),
+        "task_state": get_task_state(user) if user else {},
+    })
+
+
+@app.post("/onboard")
+async def onboard(request: Request):
+    form = await request.form()
+    postcode = form.get("postcode", "").strip()
+    if not postcode:
+        raise HTTPException(status_code=400, detail="Postcode required")
+    geo = await geocode_postcode(postcode)
+    create_user(geo.postcode, {
+        "latitude": geo.latitude,
+        "longitude": geo.longitude,
+        "region": geo.region,
+        "admin_district": geo.admin_district,
+    })
+    return RedirectResponse("/", status_code=303)
+
+
+class TaskStateUpdate(BaseModel):
+    priority: int
+    status: str | None = None
+    done_count: int | None = None
+    total_count: int | None = None
+
+
+@app.post("/api/task-state")
+async def api_task_state(update: TaskStateUpdate):
+    user = load_user()
+    if not user:
+        raise HTTPException(status_code=404, detail="No user profile")
+    user = set_task_status(user, update.priority, update.status)
+    if update.done_count is not None and update.total_count is not None:
+        user = update_history(user, update.done_count, update.total_count)
+    return {"ok": True}
+
+
+@app.get("/api/task-state")
+async def api_get_task_state():
+    user = load_user()
+    if not user:
+        return {"tasks": {}, "history": []}
+    return {
+        "tasks": get_task_state(user),
+        "history": user.get("history", []),
+    }
 
 
 def _sse(event: str, data: dict) -> str:
@@ -80,7 +132,14 @@ def _sse(event: str, data: dict) -> str:
 
 
 @app.get("/recommendations/stream")
-async def recommendations_stream(postcode: str):
+async def recommendations_stream(postcode: str | None = None):
+    if not postcode:
+        user = load_user()
+        if not user:
+            async def no_user():
+                yield _sse("error", {"message": "No user profile. Please complete onboarding."})
+            return StreamingResponse(no_user(), media_type="text/event-stream")
+        postcode = user["postcode"]
     async def generate():
         today = date.today()
         week = today.strftime("%G-W%V")
