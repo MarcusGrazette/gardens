@@ -11,9 +11,9 @@ The key differentiator is **degree of customisation** — every recommendation r
 | Layer | Choice | Notes |
 |-------|--------|-------|
 | Backend | **Python + FastAPI** | Async, good LLM ecosystem |
-| Frontend | **Jinja2 + vanilla JS** | Server-rendered template, SSE for streaming, localStorage for client state |
+| Frontend | **Jinja2 + vanilla JS** | Server-rendered template, SSE for streaming, three-column desktop layout |
 | CSS | **Inline (custom properties)** | No build step, design-token-based |
-| Database | **None (MVP)** | Client-side localStorage; PostgreSQL planned for accounts |
+| Database | **None (MVP)** | Server-side JSON file (`.data/user.json`); PostgreSQL planned for accounts |
 | LLM | **OpenAI-compatible API** | Ollama locally, cloud provider (e.g. OpenCode Zen) in prod. Use `openai` Python SDK with swappable `base_url` |
 | Email | **Resend** | For weekly recommendation emails |
 | Background jobs | **Cron / external trigger** | Railway cron or similar hits a `/generate` endpoint weekly |
@@ -141,30 +141,43 @@ Not all data sources move the needle equally. Ranked by how much they improve th
 
 ## User Data Model
 
-### Current state (no accounts — client-side only)
+### Current state (server-side JSON file)
 
-There are no user accounts or database yet. All user state lives in the browser via `localStorage`, keyed by `garden_{postcode}_{week}`:
+Single-user profile stored as `.data/user.json`. No accounts or auth — if the file exists, the user is onboarded. Delete to reset.
 
 ```json
 {
+  "postcode": "SE15 6EB",
+  "location": {
+    "latitude": 51.477558,
+    "longitude": -0.075839,
+    "region": "London",
+    "admin_district": "Southwark"
+  },
+  "garden": {
+    "orientation": null,
+    "shade": null,
+    "soil_type": null,
+    "plants": ["Michaelmas daisy", "Clematis tangutica"],
+    "experience_level": null
+  },
   "tasks": {
-    "1": "done",
-    "3": "deferred",
-    "5": "skipped"
+    "2026-W38": { "1": "done", "3": "deferred" }
   },
   "history": [
-    { "week": "2026-W37", "done": 4, "total": 6 },
-    { "week": "2026-W38", "done": 2, "total": 6 }
-  ]
+    { "week": "2026-W38", "done": 1, "total": 7 }
+  ],
+  "created_at": "2026-09-20T16:56:56.967465"
 }
 ```
 
 | Field | Description |
 |-------|-------------|
-| `tasks` | Map of action priority → status. Drives the completion ring, done/deferred panels, and task promotion. |
-| `history` | Rolling array of the last 8 weeks' completion rates. Drives the history strip and lifetime total. |
-
-Deferred tasks are re-injected at the top of the next week's list (client-side only). Clearing localStorage or switching devices loses all state.
+| `postcode` | User's postcode, set at onboarding. |
+| `location` | Geocoded from postcode via postcodes.io. |
+| `garden.plants` | User-editable plant list. Initially empty; UI shows regional defaults when empty. Edited via `POST /api/plants`. |
+| `tasks` | Map of ISO week → (action priority → status). Drives completion ring, done/deferred panels, task promotion. |
+| `history` | Rolling array of last 8 weeks' completion rates. |
 
 ### Future state (accounts + database)
 
@@ -435,7 +448,8 @@ On cache hit, only one LLM call is needed.
 ```
 gardens/
 ├── app/
-│   ├── main.py              # FastAPI app, routes, SSE streaming, recommendation caching
+│   ├── main.py              # FastAPI app, routes, SSE streaming, plants + task state APIs
+│   ├── user.py              # Server-side user store (.data/user.json)
 │   ├── config.py             # Pydantic Settings from .env
 │   ├── llm.py                # OpenAI SDK wrapper (configurable base_url)
 │   ├── weather.py            # Met Office DataHub daily forecast client
@@ -446,8 +460,9 @@ gardens/
 │   ├── perenual.py           # Trefle API client for plant search
 │   └── static/               # Watercolour header image
 ├── templates/
-│   └── index.html            # Web UI (SSE, task tracking, all sections)
+│   └── index.html            # Web UI (three-column layout, SSE, task tracking)
 ├── .cache/                   # Generated: plant lists + recommendation cache
+├── .data/                    # User profile (user.json)
 ├── .env.example
 ├── pyproject.toml
 ├── SPEC.md

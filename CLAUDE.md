@@ -27,8 +27,8 @@ curl -X POST http://localhost:8000/recommendations \
 
 ## Architecture
 
-- `app/main.py` — FastAPI app, routes (onboarding, SSE streaming, task state API, JSON API), recommendation caching, extra plant extraction from action text
-- `app/user.py` — Server-side user store (`.data/user.json`). Manages profile (postcode, location, garden prefs), per-week task state (done/deferred/skipped), and rolling completion history
+- `app/main.py` — FastAPI app, routes (onboarding, SSE streaming, task state API, plants API, JSON API), recommendation caching, extra plant extraction from action text
+- `app/user.py` — Server-side user store (`.data/user.json`). Manages profile (postcode, location, garden prefs, editable plant list), per-week task state (done/deferred/skipped), and rolling completion history
 - `app/config.py` — Pydantic Settings from `.env` (uses `extra="ignore"` for extra env vars)
 - `app/geocode.py` — Postcode validation + postcodes.io geocoding
 - `app/weather.py` — Met Office DataHub daily forecast client
@@ -38,7 +38,7 @@ curl -X POST http://localhost:8000/recommendations \
 - `app/perenual.py` — Trefle API client for plant search. Best-match logic prefers exact common name matches
 - `app/models.py` — Pydantic request/response models (`Action` has `why_now`, `minutes`; `PlantSuggestion` has `name`, `latin`, `note`)
 - `app/static/` — Static assets (header image)
-- `templates/index.html` — Web UI: onboarding (if no user profile) or auto-loading results with SSE progress, forecast strip, completion ring, lead task with "Why now" panel, task tracking (done/snooze/skip/undo), inferences, plant suggestions. Debug panel gated behind `?debug=1`
+- `templates/index.html` — Web UI: three-column desktop layout (progress tracker | tasks | garden profile) inside a paper-on-desk page container. Onboarding (if no user profile) or auto-loading results with SSE progress, forecast strip, completion ring, lead task with "Why now" panel, task tracking (done/snooze/skip/undo), soil type inferences, editable plant list, plant suggestions. Collapses to single column on mobile. Debug panel gated behind `?debug=1`
 
 ## User Profile & Onboarding
 
@@ -49,7 +49,7 @@ Single-user profile stored as `.data/user.json`. No accounts or auth — if the 
 - **Subsequent visits** (`GET /`): profile exists → auto-streams recommendations from stored postcode (no form)
 - **Reset**: delete `.data/user.json` to return to onboarding
 
-Task state (done/deferred/skipped per action per week) and completion history are persisted in the same file via `POST /api/task-state`.
+Task state (done/deferred/skipped per action per week) and completion history are persisted in the same file via `POST /api/task-state`. The user's plant list is editable via `GET/POST /api/plants` and stored in `user.garden.plants`.
 
 ## Pipeline
 
@@ -77,4 +77,6 @@ Plants are enriched via the Trefle API (`TREFLE_API_KEY` in `.env`). The enrichm
 
 ## Design
 
-Mobile-first single column (max 420px). Three font families: Newsreader (serif headlines), Inter (body), IBM Plex Mono (labels). Design tokens on `:root`: `--paper` #FAF8F3, `--desk` #EDE9E0, `--sage` #7D8545, `--ink` #33281E, `--cream` #F0E5C9, etc. Watercolour masthead with scrim gradient. Card radius 28px (shell), 18px (panels), 12px (inputs). No emoji — only `✓` and `·` as ornament. Dark `--ink` panel for inferences. Debug panel visible only with `?debug=1`.
+Three-column desktop layout (240px | flex | 280px) inside a `.page` container with `--paper` background on `--desk` body. Columns: left (progress tracker, done/deferred panels), center (forecast, lead task, task list), right (soil type, editable plants, plant suggestions). Collapses to single column below 960px with center→left→right ordering. Watercolour masthead bleeds into the card area — layout pulls up with negative margin so cards overlap the fading image.
+
+Three font families: Newsreader (serif headlines), Inter (body), IBM Plex Mono (labels). Design tokens on `:root`: `--paper` #FAF8F3, `--desk` #EDE9E0, `--sage` #7D8545, `--ink` #33281E, `--cream` #F0E5C9, etc. Card radius 28px (shell), 18px (panels), 12px (inputs). No emoji — only `✓` and `·` as ornament. Dark `--ink` panel for soil type inferences. Section headers use `.task-divider` style (mono label + rule). Debug panel visible only with `?debug=1`.

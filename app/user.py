@@ -83,6 +83,18 @@ def update_history(user: dict, done: int, total: int) -> dict:
     return user
 
 
+def get_garden_plants(user: dict) -> list[str]:
+    return user.get("garden", {}).get("plants", [])
+
+
+def set_garden_plants(user: dict, plants: list[str]) -> dict:
+    if "garden" not in user:
+        user["garden"] = {}
+    user["garden"]["plants"] = plants
+    save_user(user)
+    return user
+
+
 def delete_user() -> None:
     if USER_FILE.exists():
         USER_FILE.unlink()

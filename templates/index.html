@@ -35,12 +35,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    .col {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 0 16px 48px;
-    }
-
     .mono {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 10px;
@@ -52,16 +46,30 @@
 
     .serif { font-family: 'Newsreader', Georgia, serif; }
 
+    /* Page shell — single paper surface on desk */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--paper);
+      border-radius: 0 0 28px 28px;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    @media (min-width: 1248px) {
+      .page { margin-top: 0; }
+      body { padding: 0 24px; }
+    }
+
     /* Masthead */
     .masthead {
       position: relative;
-      margin: 0 -16px;
-      padding: 0 16px;
-      min-height: 260px;
+      padding: 0 24px;
+      min-height: 340px;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding-bottom: 28px;
+      padding-bottom: 100px;
       overflow: hidden;
     }
 
@@ -77,10 +85,11 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg,
-        rgba(250,248,243,.3) 0%,
-        rgba(250,248,243,.72) 38%,
-        rgba(250,248,243,.94) 72%,
-        #FAF8F3 100%);
+        rgba(250,248,243,.1) 0%,
+        rgba(250,248,243,.5) 35%,
+        rgba(250,248,243,.82) 58%,
+        rgba(250,248,243,.94) 78%,
+        var(--paper) 100%);
       z-index: 1;
     }
 
@@ -115,10 +124,16 @@
       font-size: 14px;
       color: var(--ink-soft);
       line-height: 1.45;
-      max-width: 31ch;
+      max-width: 40ch;
     }
 
     /* Onboarding */
+    .onboard-wrap {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 0 16px 48px;
+    }
+
     .onboard-shell {
       background: var(--card);
       border-radius: 28px;
@@ -194,7 +209,51 @@
       border-radius: 999px;
     }
 
+    /* Three-column layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr 280px;
+      gap: 24px;
+      padding: 0 24px 48px;
+      margin-top: -72px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .col-left, .col-right {
+      align-self: start;
+    }
+
+    .col-center {
+      min-width: 0;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 0 16px 48px;
+      }
+      .col-left, .col-right {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+      }
+      .col-left { order: 2; }
+      .col-center { order: 1; }
+      .col-right { order: 3; }
+    }
+
     /* Progress (SSE loading) */
+    .progress-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 24px 24px;
+      position: relative;
+      z-index: 2;
+    }
+
     #progress { display: none; margin-bottom: 16px; }
     #progress.active { display: block; }
 
@@ -273,9 +332,113 @@
       margin-bottom: 16px;
     }
 
-    /* Results shell */
-    #results { display: none; }
-    #results.active { display: block; }
+    /* Completion ring */
+    .tracker-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+
+    .completion-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ring-wrap {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+    }
+
+    .ring-wrap svg { transform: rotate(-90deg); }
+
+    .ring-track { stroke: var(--line); fill: none; }
+    .ring-arc { stroke: var(--sage); fill: none; stroke-linecap: round; transition: stroke-dasharray 0.4s ease; }
+
+    .ring-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      fill: var(--ink);
+    }
+
+    .completion-info { flex: 1; min-width: 0; }
+
+    .completion-line {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .history-strip {
+      display: flex;
+      gap: 3px;
+      align-items: flex-end;
+      margin-bottom: 4px;
+    }
+
+    .history-seg {
+      width: 16px;
+      height: 12px;
+      border-radius: 3px;
+      background: var(--line);
+    }
+
+    .history-seg.current { background: var(--sage); }
+
+    /* Done / Deferred panels */
+    .panel-done, .panel-deferred {
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .panel-done { background: var(--sage-wash); }
+    .panel-deferred { background: var(--wash); }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+
+    .panel-header .chevron {
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+
+    .panel-header.open .chevron { transform: rotate(90deg); }
+
+    .panel-body { display: none; }
+    .panel-body.open { display: block; }
+
+    .panel-task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .panel-task:last-child { border-bottom: none; }
+
+    .panel-task-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-soft);
+    }
+
+    .panel-done .panel-task-title { text-decoration: line-through; color: var(--muted); }
 
     /* Forecast strip */
     .forecast-strip {
@@ -341,60 +504,6 @@
     .frost-label.safe { color: var(--muted); }
     .frost-label.risk { color: var(--alert); }
 
-    /* Completion ring */
-    .completion-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 0;
-      margin-bottom: 8px;
-    }
-
-    .ring-wrap {
-      flex-shrink: 0;
-      width: 56px;
-      height: 56px;
-    }
-
-    .ring-wrap svg { transform: rotate(-90deg); }
-
-    .ring-track { stroke: var(--line); fill: none; }
-    .ring-arc { stroke: var(--sage); fill: none; stroke-linecap: round; transition: stroke-dasharray 0.4s ease; }
-
-    .ring-text {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      fill: var(--ink);
-    }
-
-    .completion-info { flex: 1; min-width: 0; }
-
-    .completion-line {
-      font-family: 'Newsreader', Georgia, serif;
-      font-size: 16px;
-      font-weight: 400;
-      color: var(--ink);
-      line-height: 1.3;
-      margin-bottom: 6px;
-    }
-
-    .history-strip {
-      display: flex;
-      gap: 3px;
-      align-items: flex-end;
-      margin-bottom: 4px;
-    }
-
-    .history-seg {
-      width: 16px;
-      height: 12px;
-      border-radius: 3px;
-      background: var(--line);
-    }
-
-    .history-seg.current { background: var(--sage); }
-
     /* Lead task */
     .lead-task {
       background: var(--card);
@@ -404,19 +513,19 @@
       border: 1px solid var(--line);
     }
 
-    .lead-kicker { padding: 18px 20px 0; }
-
     .lead-img {
       width: 100%;
       height: 176px;
       object-fit: cover;
       display: block;
+      border-radius: 28px 28px 0 0;
     }
 
     .lead-img-placeholder {
       width: 100%;
       height: 176px;
       background: var(--cream);
+      border-radius: 28px 28px 0 0;
       background-image: repeating-linear-gradient(135deg, rgba(166,140,105,.22) 0 2px, transparent 2px 9px);
     }
 
@@ -563,69 +672,33 @@
       cursor: help;
     }
 
-    /* Done / Deferred panels */
-    .panel-done, .panel-deferred {
+    /* Right column cards */
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--line);
       border-radius: 18px;
-      padding: 16px;
+      padding: 18px;
       margin-bottom: 12px;
     }
 
-    .panel-done { background: var(--sage-wash); }
-    .panel-deferred { background: var(--wash); }
+    .sidebar-card .section-label { margin-bottom: 12px; }
 
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      margin-bottom: 8px;
-    }
-
-    .panel-header .chevron {
-      font-size: 11px;
-      color: var(--muted);
-      transition: transform 0.2s;
-    }
-
-    .panel-header.open .chevron { transform: rotate(90deg); }
-
-    .panel-body { display: none; }
-    .panel-body.open { display: block; }
-
-    .panel-task {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,.06);
-    }
-
-    .panel-task:last-child { border-bottom: none; }
-
-    .panel-task-title {
-      font-family: 'Newsreader', Georgia, serif;
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--ink-soft);
-    }
-
-    .panel-done .panel-task-title { text-decoration: line-through; color: var(--muted); }
-
-    /* Inferences */
-    .inferences-panel {
+    /* Inferences card */
+    .inferences-card {
       background: var(--ink);
+      border: 1px solid var(--ink);
       border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
     }
 
-    .inferences-panel .section-label {
+    .inferences-card .section-label {
       color: var(--cream);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .inference {
-      padding: 10px 0;
+      padding: 8px 0;
       border-bottom: 1px solid rgba(240,229,201,.12);
     }
 
@@ -633,11 +706,11 @@
 
     .inference-value {
       font-family: 'Newsreader', Georgia, serif;
-      font-size: 19px;
+      font-size: 16px;
       font-weight: 400;
       color: var(--cream);
       line-height: 1.25;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .inference-conf {
@@ -651,24 +724,24 @@
       letter-spacing: 0.10em;
       background: rgba(240,229,201,.15);
       color: var(--cream);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .inference-reasoning {
-      font-size: 12.5px;
+      font-size: 11.5px;
       color: rgba(240,229,201,.55);
       line-height: 1.4;
     }
 
     .btn-correct {
       width: 100%;
-      margin-top: 16px;
-      padding: 12px;
+      margin-top: 14px;
+      padding: 10px;
       background: transparent;
       color: var(--cream);
       border: 1px solid rgba(240,229,201,.25);
       border-radius: 12px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       font-family: inherit;
       cursor: pointer;
@@ -677,39 +750,29 @@
 
     .btn-correct:hover { background: rgba(240,229,201,.08); }
 
-    /* Plant suggestions */
-    .plants-section {
-      background: var(--card);
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-
-    .plants-section .section-label { margin-bottom: 14px; }
-
+    /* Current plants card */
     .plant-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 0;
+      gap: 10px;
+      padding: 6px 0;
       border-bottom: 1px solid var(--line);
     }
 
     .plant-row:last-child { border-bottom: none; }
 
     .plant-thumb {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       object-fit: cover;
       flex-shrink: 0;
     }
 
     .plant-thumb-placeholder {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       flex-shrink: 0;
       background: var(--cream);
       background-image: repeating-linear-gradient(135deg, rgba(166,140,105,.22) 0 2px, transparent 2px 9px);
@@ -719,7 +782,7 @@
 
     .plant-common {
       font-family: 'Newsreader', Georgia, serif;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 400;
       color: var(--ink);
       line-height: 1.25;
@@ -727,7 +790,7 @@
 
     .plant-latin {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
+      font-size: 9.5px;
       text-transform: uppercase;
       letter-spacing: 0.10em;
       color: var(--muted);
@@ -746,15 +809,62 @@
       flex-shrink: 0;
     }
 
+    .plant-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .plant-remove:hover { color: var(--alert); }
+
+    .plant-add-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .plant-add-row input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      background: var(--paper);
+    }
+
+    .plant-add-row input:focus { border-color: var(--sage); }
+
+    .plant-add-row button {
+      padding: 8px 14px;
+      background: var(--sage-wash);
+      color: var(--sage);
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .plant-add-row button:hover { background: var(--sage-pale); }
+
     .btn-see-all {
       width: 100%;
-      margin-top: 12px;
-      padding: 10px;
+      margin-top: 10px;
+      padding: 8px;
       background: transparent;
       color: var(--ink-soft);
       border: 1px solid var(--line);
       border-radius: 12px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       font-family: inherit;
       cursor: pointer;
@@ -766,7 +876,7 @@
     .note-panel {
       background: var(--wash);
       border-radius: 18px;
-      padding: 20px;
+      padding: 18px;
       margin-bottom: 16px;
     }
 
@@ -774,10 +884,10 @@
       font-family: 'Newsreader', Georgia, serif;
       font-weight: 300;
       font-style: italic;
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.45;
       color: var(--ink);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     /* Footer */
@@ -882,9 +992,10 @@
   </style>
 </head>
 <body>
-  <div class="col">
 
-    <!-- Masthead -->
+  <div class="page">
+
+  <!-- Masthead -->
     <div class="masthead">
       <div class="masthead-bg"></div>
       <div class="masthead-scrim"></div>
@@ -900,8 +1011,9 @@
       </div>
     </div>
 
-    {% if not user %}
-    <!-- Onboarding -->
+  {% if not user %}
+  <!-- Onboarding -->
+  <div class="onboard-wrap">
     <div class="onboard-shell">
       <h2>Set up your garden</h2>
       <p>Enter your postcode to get started with personalised weekly actions.</p>
@@ -912,8 +1024,11 @@
         </div>
       </form>
     </div>
-    {% else %}
-    <!-- SSE Progress -->
+  </div>
+  {% else %}
+
+  <!-- SSE Progress (centered, shown before results) -->
+  <div class="progress-wrap">
     <div id="progress">
       <div class="progress-card">
         <div class="progress-bar-track">
@@ -922,24 +1037,32 @@
         <ul class="steps" id="steps"></ul>
       </div>
     </div>
-
     <div id="error"></div>
+  </div>
 
-    <!-- Results -->
-    <div id="results"></div>
+  <!-- Three-column results -->
+  <div class="layout" id="results" style="display:none">
+    <aside class="col-left" id="col-left"></aside>
+    <main class="col-center" id="col-center"></main>
+    <aside class="col-right" id="col-right"></aside>
+  </div>
 
-    <!-- Debug (gated) -->
+  <!-- Debug (gated) -->
+  <div class="progress-wrap">
     <div id="debug-panel">
       <button class="debug-toggle" id="debug-toggle-btn">Debug info</button>
       <div id="debug-content" style="display:none"></div>
     </div>
-    {% endif %}
   </div>
+  {% endif %}
+
+  </div><!-- .page -->
 
   {% if user %}
   <script>
     const USER_POSTCODE = {{ user.postcode | tojson }};
     const USER_LOCATION = {{ (user.location.admin_district or user.location.region) | tojson }};
+    const USER_PLANTS = {{ (user.garden.plants or []) | tojson }};
     const INITIAL_TASK_STATE = {{ task_state | tojson }};
     const CURRENT_WEEK = {{ week | tojson }};
 
@@ -955,23 +1078,28 @@
 
     const SHOW_DEBUG = new URLSearchParams(window.location.search).has('debug');
 
-    const progressEl = document.getElementById('progress');
     const barEl = document.getElementById('bar');
     const stepsEl = document.getElementById('steps');
-    const resultsEl = document.getElementById('results');
     const errorEl = document.getElementById('error');
     const debugPanel = document.getElementById('debug-panel');
     const debugContent = document.getElementById('debug-content');
     const debugToggleBtn = document.getElementById('debug-toggle-btn');
     const mastheadWeek = document.getElementById('masthead-week');
-    const mastheadLocation = document.getElementById('masthead-location');
     const mastheadSummary = document.getElementById('masthead-summary');
+
+    const colLeft = document.getElementById('col-left');
+    const colCenter = document.getElementById('col-center');
+    const colRight = document.getElementById('col-right');
+    const resultsEl = document.getElementById('results');
+    const progressEl = document.getElementById('progress');
 
     let debugData = {};
     let weatherDays = [];
     let taskState = Object.assign({}, INITIAL_TASK_STATE);
     let allActions = [];
     let plantLookup = {};
+    let currentPlants = USER_PLANTS.slice();
+    let resultData = null;
 
     function seasonLabel() {
       const m = new Date().getMonth() + 1;
@@ -1018,10 +1146,20 @@
       });
     }
 
+    function persistPlants() {
+      fetch('/api/plants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plants: currentPlants }),
+      });
+    }
+
     function startStream() {
       progressEl.classList.add('active');
-      resultsEl.classList.remove('active');
-      resultsEl.innerHTML = '';
+      resultsEl.style.display = 'none';
+      colLeft.innerHTML = '';
+      colCenter.innerHTML = '';
+      colRight.innerHTML = '';
       errorEl.innerHTML = '';
       stepsEl.innerHTML = '';
       barEl.style.width = '0%';
@@ -1036,7 +1174,7 @@
         stepsEl.querySelectorAll('li.active').forEach(li => {
           li.classList.remove('active');
           li.classList.add('done');
-          li.querySelector('.icon').innerHTML = '✓';
+          li.querySelector('.icon').innerHTML = '&#10003;';
         });
 
         const li = document.createElement('li');
@@ -1060,13 +1198,13 @@
         stepsEl.querySelectorAll('li.active').forEach(li => {
           li.classList.remove('active');
           li.classList.add('done');
-          li.querySelector('.icon').innerHTML = '✓';
+          li.querySelector('.icon').innerHTML = '&#10003;';
         });
 
         setTimeout(() => {
           progressEl.classList.remove('active');
-          const data = JSON.parse(e.data);
-          renderResults(data);
+          resultData = JSON.parse(e.data);
+          renderResults(resultData);
           if (SHOW_DEBUG) renderDebugPanel();
         }, 500);
       });
@@ -1117,14 +1255,23 @@
         .filter(([, p]) => p.latin)
         .sort((a, b) => b[0].length - a[0].length);
       for (const [key, plant] of entries) {
-        const re = new RegExp('(?<![\\w-])(' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![\\w-])', 'gi');
-        annotated = annotated.replace(re, '<span class="plant-name" title="' + esc(plant.latin) + '">$1</span>');
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp('(?<![\\w-])(' + escaped + ')(?![\\w-])', 'gi');
+        annotated = annotated.replace(re, (match, word, offset) => {
+          const before = annotated.slice(0, offset);
+          const openTags = (before.match(/</g) || []).length;
+          const closeTags = (before.match(/>/g) || []).length;
+          if (openTags > closeTags) return match;
+          return '<span class="plant-name" title="' + esc(plant.latin) + '">' + word + '</span>';
+        });
       }
       return annotated;
     }
 
+    // ---- Render three columns ----
+
     function renderResults(data) {
-      resultsEl.classList.add('active');
+      resultsEl.style.display = 'grid';
       plantLookup = buildPlantLookup(data.regional_plants);
       allActions = data.actions || [];
 
@@ -1132,45 +1279,51 @@
         mastheadSummary.textContent = data.summary;
       }
 
+      renderLeftColumn();
+      renderCenterColumn(data);
+      renderRightColumn(data);
+      wireTaskButtons();
+    }
+
+    // LEFT COLUMN: tracker + done/deferred
+    function renderLeftColumn() {
+      let html = '<div class="task-divider"><span class="mono">This week\'s progress</span></div>';
+      html += '<div id="tracker-card" class="tracker-card"></div>';
+      html += '<div id="done-panel"></div>';
+      html += '<div id="deferred-panel"></div>';
+      colLeft.innerHTML = html;
+      renderCompletionRing();
+      renderStatePanels();
+    }
+
+    // CENTER COLUMN: forecast + tasks
+    function renderCenterColumn(data) {
       let html = '';
 
       if (weatherDays.length > 0) {
         html += renderForecastStrip(weatherDays);
       }
 
-      html += '<div id="completion-area"></div>';
-
       const live = [];
-      const done = [];
-      const deferred = [];
       for (const action of allActions) {
         const st = taskState[action.priority];
-        if (st === 'done') done.push(action);
-        else if (st === 'deferred' || st === 'skipped') deferred.push(action);
-        else live.push(action);
+        if (!st) live.push(action);
       }
 
+      html += '<div id="task-area">';
       if (live.length > 0) {
         html += renderLeadTask(live[0]);
       }
-
       if (live.length > 1) {
         html += '<div class="task-divider"><span class="mono">Then, when you have time</span></div>';
         for (let i = 1; i < live.length; i++) {
           html += renderTaskRow(live[i]);
         }
       }
-
-      html += '<div id="done-panel"></div>';
-      html += '<div id="deferred-panel"></div>';
-
-      if (data.inferences && data.inferences.length > 0) {
-        html += renderInferences(data.inferences);
+      if (live.length === 0 && allActions.length > 0) {
+        html += '<div class="note-panel"><p class="note-text">All done for this week. Well gardened.</p></div>';
       }
-
-      if (data.plant_suggestions && data.plant_suggestions.length > 0) {
-        html += renderPlantSuggestions(data.plant_suggestions);
-      }
+      html += '</div>';
 
       if (data.notes) {
         const weekNum = CURRENT_WEEK.replace(/.*W/, '');
@@ -1182,10 +1335,28 @@
 
       html += '<div class="footer"><span class="mono">Met Office · postcodes.io · ' + esc(USER_POSTCODE) + '</span></div>';
 
-      resultsEl.innerHTML = html;
-      renderCompletionRing();
-      renderStatePanels();
-      wireTaskButtons();
+      colCenter.innerHTML = html;
+    }
+
+    // RIGHT COLUMN: garden profile, current plants, plant suggestions
+    function renderRightColumn(data) {
+      let html = '<div class="task-divider"><span class="mono">Your garden</span></div>';
+
+      if (data.inferences && data.inferences.length > 0) {
+        html += renderInferences(data.inferences);
+      }
+
+      html += renderCurrentPlants(data.regional_plants || []);
+
+      const suggestions = (data.plant_suggestions || []).filter(s => {
+        const name = typeof s === 'string' ? s : s.name;
+        return name && name.trim().length > 0;
+      });
+      if (suggestions.length > 0) {
+        html += renderPlantSuggestions(suggestions);
+      }
+
+      colRight.innerHTML = html;
     }
 
     function renderForecastStrip(days) {
@@ -1210,7 +1381,7 @@
         cells += '<div class="forecast-day">'
           + '<div class="day-label">' + dayInit + '</div>'
           + '<div class="rain-track"><div class="rain-fill" style="height:' + rainH + 'px"></div></div>'
-          + '<div class="temp">' + (high !== '' ? Math.round(high) + '°' : '') + '</div>'
+          + '<div class="temp">' + (high !== '' ? Math.round(high) + '&deg;' : '') + '</div>'
           + '<div class="rain-pct">' + rain + '%</div>'
           + '</div>';
       }
@@ -1226,7 +1397,7 @@
     }
 
     function renderCompletionRing() {
-      const area = document.getElementById('completion-area');
+      const area = document.getElementById('tracker-card');
       if (!area) return;
       const total = allActions.length;
       const doneCount = Object.values(taskState).filter(v => v === 'done').length;
@@ -1236,7 +1407,7 @@
 
       let msg = 'Nothing ticked off yet.';
       if (doneCount > 0 && doneCount < total) msg = doneCount + ' of ' + total + ' done. Keep going.';
-      if (doneCount === total && total > 0) msg = 'Week complete. Well gardened.';
+      if (doneCount === total && total > 0) msg = 'Week complete!';
 
       let histHtml = '<div class="history-strip">';
       histHtml += '<div class="history-seg current"></div>';
@@ -1255,7 +1426,6 @@
         + '<div class="completion-info">'
         + '<div class="completion-line">' + msg + '</div>'
         + histHtml
-        + '<span class="mono">' + doneCount + ' tasks lifetime</span>'
         + '</div>'
         + '</div>';
     }
@@ -1282,15 +1452,15 @@
           + '</div>';
       }
 
-      return '<div class="lead-task" data-priority="' + action.priority + '">'
-        + '<div class="lead-kicker"><span class="mono" style="color:var(--' + kickerClass + ')">' + kickerText + '</span></div>'
+      return '<div class="task-divider"><span class="mono" style="color:var(--' + kickerClass + ')">' + kickerText + '</span></div>'
+        + '<div class="lead-task" data-priority="' + action.priority + '">'
         + imgHtml
         + '<div class="lead-body">'
         + '<h2 class="lead-title">' + titleHtml + '</h2>'
         + '<p class="lead-detail">' + detailHtml + '</p>'
         + whyNowHtml
         + '<div class="lead-actions">'
-        + '<button class="btn btn-done lead-done-btn" data-p="' + action.priority + '">✓ Mark done</button>'
+        + '<button class="btn btn-done lead-done-btn" data-p="' + action.priority + '">&#10003; Mark done</button>'
         + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="defer">Snooze</button>'
         + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="skip">Skip</button>'
         + '</div>'
@@ -1320,7 +1490,7 @@
         + '<span class="spacer"></span>'
         + '<div class="task-btns">'
         + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="defer">Snooze</button>'
-        + '<button class="btn btn-sm" data-p="' + action.priority + '" data-act="done">✓ Done</button>'
+        + '<button class="btn btn-sm" data-p="' + action.priority + '" data-act="done">&#10003; Done</button>'
         + '</div>'
         + '</div>'
         + '</div>'
@@ -1351,7 +1521,7 @@
 
       if (deferredActions.length > 0) {
         let h = '<div class="panel-deferred">'
-          + '<div class="panel-header open" data-panel="defer-body"><span class="mono">Moved to next week · ' + deferredActions.length + '</span><span class="chevron">&#9654;</span></div>'
+          + '<div class="panel-header open" data-panel="defer-body"><span class="mono">Next week · ' + deferredActions.length + '</span><span class="chevron">&#9654;</span></div>'
           + '<div class="panel-body open" id="defer-body">';
         for (const a of deferredActions) {
           h += '<div class="panel-task"><span class="panel-task-title">' + esc(a.title) + '</span>'
@@ -1402,49 +1572,14 @@
     }
 
     function rerender() {
-      const live = [];
-      for (const action of allActions) {
-        const st = taskState[action.priority];
-        if (!st) live.push(action);
-      }
-
-      let liveHtml = '';
-      if (live.length > 0) {
-        liveHtml += renderLeadTask(live[0]);
-      }
-      if (live.length > 1) {
-        liveHtml += '<div class="task-divider"><span class="mono">Then, when you have time</span></div>';
-        for (let i = 1; i < live.length; i++) {
-          liveHtml += renderTaskRow(live[i]);
-        }
-      }
-
-      const leadEl = resultsEl.querySelector('.lead-task');
-      const divider = resultsEl.querySelector('.task-divider');
-      const taskRows = resultsEl.querySelectorAll('.task-row');
-      const doneP = document.getElementById('done-panel');
-
-      const toRemove = [];
-      if (leadEl) toRemove.push(leadEl);
-      if (divider) toRemove.push(divider);
-      taskRows.forEach(r => toRemove.push(r));
-      toRemove.forEach(el => el.remove());
-
-      if (doneP) {
-        const temp = document.createElement('div');
-        temp.innerHTML = liveHtml;
-        while (temp.firstChild) {
-          doneP.parentNode.insertBefore(temp.firstChild, doneP);
-        }
-      }
-
-      renderCompletionRing();
-      renderStatePanels();
+      renderLeftColumn();
+      renderCenterColumn(resultData);
+      wireTaskButtons();
     }
 
     function renderInferences(inferences) {
-      let html = '<div class="inferences-panel">'
-        + '<div class="mono section-label">What we know about your garden</div>';
+      let html = '<div class="inferences-card">'
+        + '<div class="mono section-label">Soil type</div>';
       for (const inf of inferences) {
         const val = Array.isArray(inf.value) ? inf.value.join(', ') : inf.value;
         html += '<div class="inference">'
@@ -1453,27 +1588,65 @@
           + '<div class="inference-reasoning">' + esc(inf.reasoning) + '</div>'
           + '</div>';
       }
-      html += '<button class="btn-correct">That\'s not quite right — correct it</button>';
+      html += '<button class="btn-correct">That\'s not quite right</button>';
+      html += '</div>';
+      return html;
+    }
+
+    function renderCurrentPlants(regionalPlants) {
+      const plants = currentPlants.length > 0
+        ? currentPlants
+        : regionalPlants.slice(0, 8).map(p => p.name);
+
+      let html = '<div class="sidebar-card">'
+        + '<div class="mono section-label">Your plants</div>';
+
+      for (const name of plants) {
+        const match = plantLookup[name.toLowerCase()];
+        const thumbHtml = match && match.thumbnail
+          ? '<img class="plant-thumb" src="' + esc(match.thumbnail) + '" alt="">'
+          : '<div class="plant-thumb-placeholder"></div>';
+        const latinText = (match && match.latin) || '';
+
+        html += '<div class="plant-row">'
+          + thumbHtml
+          + '<div class="plant-info">'
+          + '<div class="plant-common">' + esc(name) + '</div>'
+          + (latinText ? '<div class="plant-latin">' + esc(latinText) + '</div>' : '')
+          + '</div>'
+          + '<button class="plant-remove" data-plant="' + esc(name) + '" title="Remove">&times;</button>'
+          + '</div>';
+      }
+
+      html += '<div class="plant-add-row">'
+        + '<input type="text" id="add-plant-input" placeholder="Add a plant...">'
+        + '<button id="add-plant-btn">Add</button>'
+        + '</div>';
+
+      if (currentPlants.length === 0 && regionalPlants.length > 0) {
+        html += '<div style="margin-top:8px"><span class="mono">Inferred from your area</span></div>';
+      }
+
       html += '</div>';
       return html;
     }
 
     function renderPlantSuggestions(suggestions) {
       const season = seasonLabel().split(' ').pop();
-      let html = '<div class="plants-section">'
-        + '<div class="mono section-label">Worth adding this ' + season + '</div>';
+      let html = '<div class="sidebar-card">'
+        + '<div class="mono section-label">Consider adding this ' + season + '</div>';
 
       const showCount = 4;
       const total = suggestions.length;
 
       for (let i = 0; i < Math.min(showCount, total); i++) {
-        html += renderPlantRow(suggestions[i]);
+        html += renderSuggestionRow(suggestions[i]);
       }
 
       if (total > showCount) {
         html += '<div id="extra-plants" style="display:none">';
         for (let i = showCount; i < total; i++) {
-          html += renderPlantRow(suggestions[i]);
+          html += renderSuggestionRow(suggestions[i]);
         }
         html += '</div>';
         html += '<button class="btn-see-all" id="see-all-plants">See all ' + total + ' suggestions</button>';
@@ -1483,7 +1656,7 @@
       return html;
     }
 
-    function renderPlantRow(suggestion) {
+    function renderSuggestionRow(suggestion) {
       const name = typeof suggestion === 'string' ? suggestion : suggestion.name;
       const latin = typeof suggestion === 'object' ? suggestion.latin : null;
       const note = typeof suggestion === 'object' ? suggestion.note : null;
@@ -1557,6 +1730,7 @@
         + '</div>';
     }
 
+    // Event delegation for dynamic elements
     document.addEventListener('click', (e) => {
       if (e.target.id === 'see-all-plants') {
         const extra = document.getElementById('extra-plants');
@@ -1564,6 +1738,35 @@
           extra.style.display = 'block';
           e.target.remove();
         }
+      }
+
+      if (e.target.classList.contains('plant-remove')) {
+        const name = e.target.dataset.plant;
+        currentPlants = currentPlants.filter(p => p !== name);
+        persistPlants();
+        colRight.innerHTML = '';
+        renderRightColumn(resultData);
+      }
+
+      if (e.target.id === 'add-plant-btn') {
+        const input = document.getElementById('add-plant-input');
+        const val = input.value.trim();
+        if (val && !currentPlants.includes(val)) {
+          if (currentPlants.length === 0 && resultData && resultData.regional_plants) {
+            currentPlants = resultData.regional_plants.slice(0, 8).map(p => p.name);
+          }
+          currentPlants.push(val);
+          persistPlants();
+          colRight.innerHTML = '';
+          renderRightColumn(resultData);
+        }
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.id === 'add-plant-input' && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('add-plant-btn').click();
       }
     });
 
@@ -1574,7 +1777,6 @@
       return el.innerHTML;
     }
 
-    // Auto-start the stream on page load
     startStream();
   </script>
   {% endif %}

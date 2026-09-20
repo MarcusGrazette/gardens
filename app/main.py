@@ -18,7 +18,7 @@ from app.prompts import (
     current_season,
 )
 from app.llm import generate_json
-from app.user import load_user, create_user, set_task_status, update_history, get_task_state, current_week
+from app.user import load_user, create_user, set_task_status, update_history, get_task_state, current_week, get_garden_plants, set_garden_plants
 from app.weather import fetch_forecast, summarise_forecast
 
 import re
@@ -125,6 +125,27 @@ async def api_get_task_state():
         "tasks": get_task_state(user),
         "history": user.get("history", []),
     }
+
+
+class PlantsUpdate(BaseModel):
+    plants: list[str]
+
+
+@app.get("/api/plants")
+async def api_get_plants():
+    user = load_user()
+    if not user:
+        return {"plants": []}
+    return {"plants": get_garden_plants(user)}
+
+
+@app.post("/api/plants")
+async def api_set_plants(update: PlantsUpdate):
+    user = load_user()
+    if not user:
+        raise HTTPException(status_code=404, detail="No user profile")
+    set_garden_plants(user, update.plants)
+    return {"ok": True, "plants": update.plants}
 
 
 def _sse(event: str, data: dict) -> str:
