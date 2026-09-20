@@ -10,4 +10,5 @@ dependencies = [
     "openai",
     "pydantic-settings",
     "python-dotenv",
+    "jinja2",
 ]

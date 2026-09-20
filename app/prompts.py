@@ -16,15 +16,18 @@ def current_season() -> str:
     return "spring"
 
 
-REGIONAL_PLANTS_SYSTEM = "You are an expert UK horticulturist."
+REGIONAL_PLANTS_SYSTEM = "You are an expert UK horticulturist specialising in ornamental and home gardens."
 
-REGIONAL_PLANTS_USER = """List 20-30 plants commonly grown in domestic gardens in {region} during {season}.
-Include a mix of vegetables, herbs, flowers, and shrubs typical for the area.
-Return ONLY a JSON array of objects: [{{"name": "...", "type": "vegetable|herb|flower|shrub|tree"}}]
+REGIONAL_PLANTS_USER = """List the 10 most popular ornamental plants grown in home gardens in {region} during {season}.
+Focus on flowers, shrubs, climbers and perennials typical of beds, borders, pots and containers.
+Do NOT include vegetables, crops or agricultural plants.
+Return ONLY a JSON array of objects: [{{"name": "...", "type": "flower|shrub|climber|perennial|bulb|tree"}}]
 No other text, just the JSON array."""
 
 
-RECOMMENDATIONS_SYSTEM = """You are an expert UK gardener and horticulturist. Generate a prioritised weekly action list for this gardener based on their specific situation.
+RECOMMENDATIONS_SYSTEM = """You are an expert UK gardener specialising in ornamental home gardens — beds, borders, pots and containers. Generate a prioritised weekly action list for this home gardener.
+
+Focus on flowers, shrubs, climbers, perennials and bulbs. Do NOT suggest vegetable growing, crop rotation or agricultural tasks unless the user has specifically listed edible plants.
 
 You MUST return ONLY valid JSON matching this schema, with no other text:
 {{
@@ -34,7 +37,7 @@ You MUST return ONLY valid JSON matching this schema, with no other text:
       "priority": 1,
       "title": "Short action title",
       "detail": "Specific, actionable detail referencing weather and plants",
-      "category": "weather-response|seasonal-planting|maintenance|harvesting|pest-control|soil-care",
+      "category": "weather-response|seasonal-planting|maintenance|pruning|pest-control|soil-care",
       "urgent": true/false
     }}
   ],
@@ -56,6 +59,6 @@ RECOMMENDATIONS_USER = """Context:
 - Season: {season}
 - Weather forecast (next 7 days):
 {forecast}
-- Plants: {plants}
+- Plants in garden: {plants}
 
-Generate 5-7 actions for this week, ordered by priority. Each action should be specific (not "water your plants" but "water tomatoes deeply 2-3 times this week due to forecasted dry spell"). Flag any urgent items (frost warnings, pest alerts, time-sensitive planting windows). For new/minimal profiles, include suggestions for what to plant this time of year. Include any inferences you made about the garden."""
+Generate 5-7 actions for this week, ordered by priority. Each action should be specific to ornamental home gardening (not "water your plants" but "water dahlias deeply 2-3 times this week due to forecasted dry spell"). Flag any urgent items (frost warnings, pest alerts, time-sensitive planting windows). For new/minimal profiles, suggest ornamental plants to add this time of year. Include any inferences you made about the garden."""

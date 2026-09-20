@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     llm_api_key: str = "ollama"
     met_office_api_key: str = ""
 
-    model_config = {"env_file": ".env"}
+    model_config = {"env_file": ".env", "extra": "ignore"}
 
 
 settings = Settings()

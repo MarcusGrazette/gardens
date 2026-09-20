@@ -1,10 +1,19 @@
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from app.llm import generate_json
 from app.prompts import REGIONAL_PLANTS_SYSTEM, REGIONAL_PLANTS_USER, current_season
 
 CACHE_DIR = Path(__file__).parent.parent / ".cache"
+
+
+@dataclass
+class PlantResult:
+    plants: list[dict]
+    cache_hit: bool
+    prompt: str | None = None
+    raw_response: str | None = None
 
 
 def _cache_path(region: str, season: str) -> Path:
@@ -25,13 +34,13 @@ def save_cached_plants(region: str, season: str, plants: list[dict]) -> None:
     path.write_text(json.dumps(plants, indent=2))
 
 
-async def get_regional_plants(region: str) -> list[dict]:
+async def get_regional_plants(region: str) -> PlantResult:
     season = current_season()
     cached = get_cached_plants(region, season)
     if cached is not None:
-        return cached
+        return PlantResult(plants=cached, cache_hit=True)
 
     prompt = REGIONAL_PLANTS_USER.format(region=region, season=season)
-    plants = await generate_json(REGIONAL_PLANTS_SYSTEM, prompt)
+    plants, raw = await generate_json(REGIONAL_PLANTS_SYSTEM, prompt)
     save_cached_plants(region, season, plants)
-    return plants
+    return PlantResult(plants=plants, cache_hit=False, prompt=prompt, raw_response=raw)

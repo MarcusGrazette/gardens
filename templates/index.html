@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garden Todo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --bg-card: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --border: #e5e5e0;
+      --green-50: #f0fdf4;
+      --green-100: #dcfce7;
+      --green-600: #16a34a;
+      --green-700: #15803d;
+      --green-800: #166534;
+      --amber-50: #fffbeb;
+      --amber-600: #d97706;
+      --amber-700: #b45309;
+      --blue-50: #eff6ff;
+      --blue-600: #2563eb;
+      --blue-700: #1d4ed8;
+      --red-50: #fef2f2;
+      --red-600: #dc2626;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      padding: 48px 0 32px;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--green-800);
+      margin-bottom: 4px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus { border-color: var(--green-600); }
+    input[type="text"]::placeholder { color: #aaa; }
+
+    button {
+      padding: 12px 24px;
+      background: var(--green-700);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--green-800); }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* Progress */
+    #progress { display: none; margin-bottom: 24px; }
+    #progress.active { display: block; }
+
+    .progress-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .progress-bar-track {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--green-600);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .steps { list-style: none; }
+
+    .steps li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .steps li .icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .steps li.done { color: var(--green-700); }
+    .steps li.active { color: var(--text); font-weight: 500; }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e5e7eb;
+      border-top-color: var(--green-600);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results */
+    #results { display: none; }
+    #results.active { display: block; }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .results-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--green-800);
+    }
+
+    .results-header .week {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .action-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+
+    .action-card.urgent { border-left: 3px solid var(--amber-600); }
+
+    .action-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .action-title { font-weight: 600; font-size: 0.95rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-urgent { background: var(--amber-50); color: var(--amber-700); }
+    .badge-category { background: var(--green-50); color: var(--green-700); }
+
+    .action-detail {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .priority-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      background: var(--green-600);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-right: 6px;
+      position: relative;
+      top: -1px;
+    }
+
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+
+    .section-card h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .inference {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+
+    .inference:last-child { border-bottom: none; }
+    .inference-field { font-weight: 600; text-transform: capitalize; }
+    .inference-reasoning { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
+
+    .plant-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .plant-tag {
+      background: var(--green-50);
+      color: var(--green-700);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .notes {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .error-msg {
+      background: var(--red-50);
+      color: var(--red-600);
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    /* Debug panel */
+    #debug-panel { display: none; margin-top: 32px; }
+    #debug-panel.active { display: block; }
+
+    .debug-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--slate-700);
+      cursor: pointer;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+
+    .debug-toggle:hover { background: var(--slate-200); }
+
+    .debug-section {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .debug-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .debug-section-header:hover { background: var(--slate-100); }
+
+    .debug-section-header h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate-600);
+    }
+
+    .debug-section-header .chevron {
+      font-size: 0.75rem;
+      color: var(--slate-600);
+      transition: transform 0.2s;
+    }
+
+    .debug-section-header.open .chevron { transform: rotate(90deg); }
+
+    .debug-section-body {
+      display: none;
+      padding: 0 16px 16px;
+    }
+
+    .debug-section-body.open { display: block; }
+
+    .debug-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate-600);
+      margin: 12px 0 4px;
+    }
+
+    .debug-label:first-child { margin-top: 0; }
+
+    .debug-pre {
+      background: var(--slate-800);
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Garden Todo</h1>
+      <p>Personalised gardening actions for your week</p>
+    </header>
+
+    <div class="form-card">
+      <form id="form">
+        <div class="input-row">
+          <input type="text" id="postcode" name="postcode" placeholder="Enter your postcode, e.g. SE15 4QN" autocomplete="postal-code" required>
+          <button type="submit" id="submit-btn">Go</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="progress">
+      <div class="progress-card">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="bar"></div>
+        </div>
+        <ul class="steps" id="steps"></ul>
+      </div>
+    </div>
+
+    <div id="error"></div>
+    <div id="results"></div>
+
+    <div id="debug-panel">
+      <button class="debug-toggle" id="debug-toggle-btn">&#9881; Debug info</button>
+      <div id="debug-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+    const PIPELINE_STEPS = [
+      'Validating postcode',
+      'Looking up location',
+      'Fetching weather forecast',
+      'Weather received',
+      'Loading regional plants',
+      'Plant data loaded',
+      'Generating your garden plan',
+    ];
+
+    const form = document.getElementById('form');
+    const postcodeInput = document.getElementById('postcode');
+    const submitBtn = document.getElementById('submit-btn');
+    const progressEl = document.getElementById('progress');
+    const barEl = document.getElementById('bar');
+    const stepsEl = document.getElementById('steps');
+    const resultsEl = document.getElementById('results');
+    const errorEl = document.getElementById('error');
+    const debugPanel = document.getElementById('debug-panel');
+    const debugContent = document.getElementById('debug-content');
+    const debugToggleBtn = document.getElementById('debug-toggle-btn');
+
+    let debugData = {};
+
+    debugToggleBtn.addEventListener('click', () => {
+      const content = debugContent;
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        debugToggleBtn.textContent = '✕ Hide debug info';
+      } else {
+        content.style.display = 'none';
+        debugToggleBtn.textContent = '⚙ Debug info';
+      }
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const postcode = postcodeInput.value.trim();
+      if (!postcode) return;
+
+      submitBtn.disabled = true;
+      progressEl.classList.add('active');
+      resultsEl.classList.remove('active');
+      resultsEl.innerHTML = '';
+      errorEl.innerHTML = '';
+      stepsEl.innerHTML = '';
+      barEl.style.width = '0%';
+      debugPanel.classList.remove('active');
+      debugContent.innerHTML = '';
+      debugContent.style.display = 'none';
+      debugToggleBtn.textContent = '⚙ Debug info';
+      debugData = {};
+
+      const source = new EventSource(`/recommendations/stream?postcode=${encodeURIComponent(postcode)}`);
+
+      source.addEventListener('step', (e) => {
+        const data = JSON.parse(e.data);
+        const pct = ((data.step + 1) / PIPELINE_STEPS.length * 90).toFixed(0);
+        barEl.style.width = pct + '%';
+
+        stepsEl.querySelectorAll('li.active').forEach(li => {
+          li.classList.remove('active');
+          li.classList.add('done');
+          li.querySelector('.icon').innerHTML = '&#10003;';
+        });
+
+        const li = document.createElement('li');
+        li.classList.add('active');
+        li.innerHTML = `<span class="icon"><span class="spinner"></span></span> ${data.label}`;
+        stepsEl.appendChild(li);
+      });
+
+      source.addEventListener('debug', (e) => {
+        const data = JSON.parse(e.data);
+        debugData[data.section] = data.data;
+      });
+
+      source.addEventListener('done', (e) => {
+        source.close();
+        barEl.style.width = '100%';
+
+        stepsEl.querySelectorAll('li.active').forEach(li => {
+          li.classList.remove('active');
+          li.classList.add('done');
+          li.querySelector('.icon').innerHTML = '&#10003;';
+        });
+
+        setTimeout(() => {
+          progressEl.classList.remove('active');
+          const data = JSON.parse(e.data);
+          renderResults(data);
+          renderDebugPanel();
+          submitBtn.disabled = false;
+        }, 500);
+      });
+
+      source.addEventListener('error', (e) => {
+        if (e.data) {
+          const data = JSON.parse(e.data);
+          errorEl.innerHTML = `<div class="error-msg">${data.message}</div>`;
+        } else {
+          errorEl.innerHTML = `<div class="error-msg">Connection lost. Please try again.</div>`;
+        }
+        source.close();
+        progressEl.classList.remove('active');
+        submitBtn.disabled = false;
+      });
+    });
+
+    function renderResults(data) {
+      resultsEl.classList.add('active');
+      let html = '';
+
+      html += `<div class="results-header">
+        <h2>Your garden plan</h2>
+        <span class="week">${data.week || ''}</span>
+      </div>`;
+
+      if (data.actions) {
+        for (const action of data.actions) {
+          const urgentClass = action.urgent ? ' urgent' : '';
+          const urgentBadge = action.urgent ? '<span class="badge badge-urgent">Urgent</span>' : '';
+          const categoryBadge = action.category ? `<span class="badge badge-category">${action.category.replace(/-/g, ' ')}</span>` : '';
+
+          html += `<div class="action-card${urgentClass}">
+            <div class="action-top">
+              <div class="action-title"><span class="priority-num">${action.priority}</span>${action.title}</div>
+              <div>${urgentBadge}</div>
+            </div>
+            <div class="action-detail">${action.detail}</div>
+            <div style="margin-top: 8px">${categoryBadge}</div>
+          </div>`;
+        }
+      }
+
+      if (data.inferences && data.inferences.length > 0) {
+        html += `<div class="section-card"><h3>What we inferred about your garden</h3>`;
+        for (const inf of data.inferences) {
+          const val = Array.isArray(inf.value) ? inf.value.join(', ') : inf.value;
+          html += `<div class="inference">
+            <div><span class="inference-field">${inf.field.replace(/_/g, ' ')}:</span> ${val} <span class="badge badge-category">${inf.confidence}</span></div>
+            <div class="inference-reasoning">${inf.reasoning}</div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+
+      if (data.plant_suggestions && data.plant_suggestions.length > 0) {
+        html += `<div class="section-card"><h3>Plant suggestions</h3><div class="plant-list">`;
+        for (const p of data.plant_suggestions) {
+          html += `<span class="plant-tag">${p}</span>`;
+        }
+        html += `</div></div>`;
+      }
+
+      if (data.notes) {
+        html += `<div class="section-card"><p class="notes">${data.notes}</p></div>`;
+      }
+
+      resultsEl.innerHTML = html;
+    }
+
+    function renderDebugPanel() {
+      debugPanel.classList.add('active');
+      let html = '';
+
+      // Geocode
+      if (debugData.geocode) {
+        html += debugSection('Geocode', `
+          <div class="debug-label">postcodes.io response</div>
+          <pre class="debug-pre">${esc(JSON.stringify(debugData.geocode, null, 2))}</pre>
+        `);
+      }
+
+      // Weather
+      if (debugData.weather) {
+        html += debugSection('Weather forecast', `
+          <div class="debug-label">Formatted summary (sent to LLM)</div>
+          <pre class="debug-pre">${esc(debugData.weather.summary)}</pre>
+          <div class="debug-label">Raw Met Office response (first 7 days)</div>
+          <pre class="debug-pre">${esc(JSON.stringify(debugData.weather.raw_days, null, 2))}</pre>
+        `);
+      }
+
+      // Plants
+      if (debugData.plants) {
+        const p = debugData.plants;
+        let plantsHtml = `<div class="debug-label">Cache ${p.cache_hit ? 'HIT' : 'MISS'}</div>`;
+        plantsHtml += `<div class="debug-label">Plant list</div>
+          <pre class="debug-pre">${esc(JSON.stringify(p.plants, null, 2))}</pre>`;
+        if (!p.cache_hit) {
+          plantsHtml += `<div class="debug-label">LLM system prompt</div>
+            <pre class="debug-pre">${esc(p.llm_system_prompt)}</pre>
+            <div class="debug-label">LLM user prompt</div>
+            <pre class="debug-pre">${esc(p.llm_prompt)}</pre>
+            <div class="debug-label">LLM raw response</div>
+            <pre class="debug-pre">${esc(p.llm_raw_response)}</pre>`;
+        }
+        html += debugSection('Regional plants', plantsHtml);
+      }
+
+      // Recommendations
+      if (debugData.recommendations) {
+        const r = debugData.recommendations;
+        html += debugSection('Recommendation LLM call', `
+          <div class="debug-label">System prompt</div>
+          <pre class="debug-pre">${esc(r.system_prompt)}</pre>
+          <div class="debug-label">User prompt</div>
+          <pre class="debug-pre">${esc(r.user_prompt)}</pre>
+          <div class="debug-label">Raw LLM response</div>
+          <pre class="debug-pre">${esc(r.raw_response)}</pre>
+        `);
+      }
+
+      debugContent.innerHTML = html;
+
+      // Wire up section toggles
+      debugContent.querySelectorAll('.debug-section-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.classList.toggle('open');
+          header.nextElementSibling.classList.toggle('open');
+        });
+      });
+    }
+
+    function debugSection(title, body) {
+      return `<div class="debug-section">
+        <div class="debug-section-header">
+          <h4>${title}</h4>
+          <span class="chevron">&#9654;</span>
+        </div>
+        <div class="debug-section-body">${body}</div>
+      </div>`;
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      const el = document.createElement('span');
+      el.textContent = s;
+      return el.innerHTML;
+    }
+  </script>
+</body>
+</html>

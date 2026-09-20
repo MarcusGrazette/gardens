@@ -21,17 +21,17 @@ async def generate(system_prompt: str, user_prompt: str) -> str:
             {"role": "user", "content": user_prompt},
         ],
         temperature=0.7,
+        max_tokens=2048,
     )
     return response.choices[0].message.content
 
 
-async def generate_json(system_prompt: str, user_prompt: str) -> dict | list:
+async def generate_json(system_prompt: str, user_prompt: str) -> tuple[dict | list, str]:
+    """Returns (parsed_json, raw_response_text)."""
     raw = await generate(system_prompt, user_prompt)
-    # Try to extract JSON from the response (LLMs often wrap in markdown code blocks)
     text = raw.strip()
     if text.startswith("```"):
-        # Remove code block markers
         lines = text.split("\n")
         lines = [l for l in lines if not l.strip().startswith("```")]
         text = "\n".join(lines)
-    return json.loads(text)
+    return json.loads(text), raw
