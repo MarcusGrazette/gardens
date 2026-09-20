@@ -11,9 +11,9 @@ The key differentiator is **degree of customisation** — every recommendation r
 | Layer | Choice | Notes |
 |-------|--------|-------|
 | Backend | **Python + FastAPI** | Async, good LLM ecosystem |
-| Frontend | **Jinja2 + HTMX** | Server-rendered, minimal JS |
-| CSS | **Tailwind CSS** | Utility-first, build step required |
-| Database | **PostgreSQL** | Custom auth (bcrypt + sessions) |
+| Frontend | **Jinja2 + vanilla JS** | Server-rendered template, SSE for streaming, localStorage for client state |
+| CSS | **Inline (custom properties)** | No build step, design-token-based |
+| Database | **None (MVP)** | Client-side localStorage; PostgreSQL planned for accounts |
 | LLM | **OpenAI-compatible API** | Ollama locally, cloud provider (e.g. OpenCode Zen) in prod. Use `openai` Python SDK with swappable `base_url` |
 | Email | **Resend** | For weekly recommendation emails |
 | Background jobs | **Cron / external trigger** | Railway cron or similar hits a `/generate` endpoint weekly |
@@ -141,6 +141,33 @@ Not all data sources move the needle equally. Ranked by how much they improve th
 
 ## User Data Model
 
+### Current state (no accounts — client-side only)
+
+There are no user accounts or database yet. All user state lives in the browser via `localStorage`, keyed by `garden_{postcode}_{week}`:
+
+```json
+{
+  "tasks": {
+    "1": "done",
+    "3": "deferred",
+    "5": "skipped"
+  },
+  "history": [
+    { "week": "2026-W37", "done": 4, "total": 6 },
+    { "week": "2026-W38", "done": 2, "total": 6 }
+  ]
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `tasks` | Map of action priority → status. Drives the completion ring, done/deferred panels, and task promotion. |
+| `history` | Rolling array of the last 8 weeks' completion rates. Drives the history strip and lifetime total. |
+
+Deferred tasks are re-injected at the top of the next week's list (client-side only). Clearing localStorage or switching devices loses all state.
+
+### Future state (accounts + database)
+
 ```
 User:
   - email (unique, used for auth)
@@ -152,6 +179,7 @@ User:
   - plants[] (list of plant names/types, optional)
   - soil_type (optional — can be inferred from postcode)
   - experience_level (beginner/intermediate/experienced, optional)
+  - confirmed_inferences[] (inferences the user has confirmed or corrected)
   - created_at
   - updated_at
 ```
@@ -196,66 +224,62 @@ Step 5: Generate recommendations (LLM call)
 The regional plant list cache avoids repeated LLM calls. Region granularity (from postcodes.io `region` field — ~12 UK regions) is coarse enough to cache efficiently but specific enough to be useful. The user refines their actual plant list via the feedback loop.
 
 ### Prompt structure (Step 5)
-```
-System: You are an expert UK gardener and horticulturist. Generate a prioritised
-weekly action list for this gardener based on their specific situation.
 
+The system prompt defines the JSON schema the LLM must return, including:
+- `summary` — one punchy sentence for the masthead, max ~120 chars
+- `actions[]` with `why_now` (one sentence connecting forecast to task) and `minutes` (estimated duration)
+- `plant_suggestions[]` as objects with `name`, `latin`, and `note` (reason to plant now)
+
+The user prompt provides:
+```
 Context:
 - Location: {postcode}, region: {region}
-- Current date: {date}, Week {week_number}
-- Weather forecast (next 7 days): {forecast_summary}
-- Garden: {orientation}, {shade_level}, {size}
-- Soil type: {soil_type or "not specified"}
-- Plants: {user_plant_list or regional_default_plants}
-- Experience level: {level}
-- Confirmed inferences: {confirmed_inferences or "none yet"}
-- Rejected inferences: {rejected_inferences or "none yet"}
-- Recently completed tasks: {completed_tasks or "none yet"}
+- Current date: {date}, Week {week}
+- Season: {season}
+- Weather forecast (next 7 days): {forecast}
+- Plants in garden: {plants}
 
-Generate:
-1. Top 5-7 actions for this week, ordered by priority
-2. Each action should be specific (not "water your plants" but "water tomatoes deeply
-   2-3 times this week due to forecasted dry spell")
-3. Flag any urgent items (frost warnings, pest alerts, time-sensitive planting windows)
-4. For new/minimal profiles, include suggestions for what to plant this time of year
-5. Include any inferences you made about the garden in the "inferences" field so the user can confirm or correct them
-6. Do not re-suggest tasks the user has already completed this season unless a repeat is genuinely needed
+Generate 5-7 actions for this week, ordered by priority.
 ```
+
+Focus is on **ornamental home gardening** — flowers, shrubs, climbers, perennials and bulbs. The prompt explicitly excludes vegetable growing and crop rotation unless the user has specifically listed edible plants.
 
 ### Regional plant list prompt (Step 4, cached)
 ```
-System: You are an expert UK horticulturist.
+System: You are an expert UK horticulturist specialising in ornamental and home gardens.
 
-List 20-30 plants commonly grown in domestic gardens in {region} during {season}.
-Include a mix of vegetables, herbs, flowers, and shrubs typical for the area.
-Return as a JSON array of objects: [{"name": "...", "type": "vegetable|herb|flower|shrub|tree"}]
+List the 10 most popular ornamental plants grown in home gardens in {region} during {season}.
+Focus on flowers, shrubs, climbers and perennials typical of beds, borders, pots and containers.
+Do NOT include vegetables, crops or agricultural plants.
+Return as a JSON array of objects: [{"name": "...", "latin": "...", "type": "flower|shrub|climber|perennial|bulb|tree"}]
 ```
 
-Cache strategy (MVP): simple JSON file on disk keyed by `{region}:{season}`. ~12 regions × 4 seasons = ~48 entries max. Upgrade to Redis/DB when needed.
+Cache strategy: simple JSON file on disk at `.cache/plants_{region}_{season}.json`. ~12 regions × 4 seasons = ~48 entries max. Plants are enriched with Trefle API data (images, scientific names) before caching.
 
 ### Output format
 Structured JSON response:
 ```json
 {
   "week": "2025-W03",
+  "summary": "Seven mild, dry days on clay loam — the best bulb-planting window before the ground cools.",
   "actions": [
     {
-      "task_id": "a1b2c3",
       "priority": 1,
       "title": "Protect tender plants from forecast frost",
       "detail": "Temperatures dropping to -2°C Thursday night. Cover dahlias and move potted herbs indoors.",
       "category": "weather-response",
       "urgent": true,
-      "recurrence": "one-off"
+      "why_now": "Night lows of -2°C forecast Thursday — any unprotected dahlias or cannas will suffer crown damage.",
+      "minutes": 20
     },
     {
-      "task_id": "d4e5f6",
       "priority": 3,
       "title": "Plant spring bulbs (tulips, daffodils)",
       "detail": "October is ideal for spring bulbs. Plant 10-15cm deep in well-drained spots.",
       "category": "seasonal-planting",
       "urgent": false,
-      "recurrence": "seasonal"
+      "why_now": "Soil temperature is still above 10°C and rain midweek will settle bulbs in without watering.",
+      "minutes": 45
     }
   ],
   "inferences": [
@@ -266,10 +290,23 @@ Structured JSON response:
       "reasoning": "SE London postcodes are predominantly London Clay"
     }
   ],
-  "plant_suggestions": [],
+  "plant_suggestions": [
+    {
+      "name": "Winter heather",
+      "latin": "Erica carnea",
+      "note": "Jan colour"
+    }
+  ],
   "notes": "Optional general observations"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `summary` | string | One sentence (max ~120 chars) joining the forecast to the top priority. Displayed in the masthead. |
+| `actions[].why_now` | string \| null | One sentence connecting the forecast numbers to why this task matters this week. Shown in a "Why now" panel on the lead task and available on all tasks. |
+| `actions[].minutes` | int \| null | Estimated duration in minutes. Shown as a mono label on task rows. |
+| `plant_suggestions` | array of objects | Each with `name` (common), `latin` (scientific, optional), `note` (short reason to plant now, optional). |
 
 ## Feedback Loops
 
@@ -311,34 +348,21 @@ When the LLM infers information the user hasn't explicitly provided (e.g. soil t
 
 ### 2. Task completion tracking
 
-Actions can span multiple weeks (e.g. "plant spring bulbs" is relevant throughout October). The user can mark tasks as done so they aren't repeated, and this history informs future recommendations.
+Users can mark tasks as done, snooze them (defer to next week), or skip them. This is currently **client-side only** via localStorage (see User Data Model above).
 
-**Data model:**
-```
-TaskCompletion:
-  - user_id
-  - task_title
-  - task_category
-  - week_generated (e.g. "2025-W40")
-  - completed_at (timestamp)
-```
+**Current implementation:**
+- Each action is keyed by its `priority` number within that week
+- Three statuses: `done`, `deferred`, `skipped`
+- Done/deferred/skipped tasks move to collapsible panels; the next live task is promoted to the lead slot
+- An undo button restores the task to its original position
+- A completion ring and 8-week history strip show progress
+- Deferred tasks are re-injected at the top of the next week's list (client-side)
 
-**How it works:**
-- Each weekly todo list includes a stable `task_id` (hash of title + category + season) so the same recurring task can be recognised across weeks
-- User marks a task as done via the web UI (or a link in the email)
-- Completed tasks are included in the next LLM prompt:
-```
-Recently completed tasks:
-- "Plant spring bulbs (tulips, daffodils)" — completed 2025-W41
-- "Apply autumn lawn feed" — completed 2025-W40
-```
-- The prompt instructs the LLM: "Do not re-suggest tasks the user has already completed this season unless there is a specific reason to repeat them (e.g. a second application is needed)"
-- For multi-week tasks, the LLM can still mention related follow-up actions (e.g. after "plant bulbs" is done, it might suggest "water in newly planted bulbs if no rain forecast")
-
-### Future feedback extensions
-- **Task dismissal**: "Not relevant to me" — teaches the LLM to avoid similar suggestions
-- **Task snoozing**: "Remind me next week" — defers without completing
-- **Ratings**: Simple thumbs up/down on individual recommendations to tune quality
+**Not yet implemented (requires accounts):**
+- Completed tasks fed back into the LLM prompt to avoid re-suggestion
+- Cross-device state persistence
+- Task dismissal ("not relevant to me")
+- Ratings on individual recommendations
 
 ## Onboarding Flow (post-MVP, but designed for now)
 
@@ -406,22 +430,24 @@ On cache hit, only one LLM call is needed.
 - Pest/disease seasonal alerts
 - Historical weather patterns
 
-## Project Structure (MVP)
+## Project Structure
 
 ```
 gardens/
 ├── app/
-│   ├── main.py              # FastAPI app, routes
-│   ├── config.py             # Settings from env vars
-│   ├── llm.py                # LLM client (OpenAI SDK wrapper)
-│   ├── weather.py            # Met Office API client
-│   ├── geocode.py            # Postcode → lat/lon (postcodes.io)
-│   ├── prompts.py            # Prompt templates
-│   └── models.py             # Pydantic request/response models
-├── tests/
-│   ├── test_recommendations.py
-│   ├── test_weather.py
-│   └── test_geocode.py
+│   ├── main.py              # FastAPI app, routes, SSE streaming, recommendation caching
+│   ├── config.py             # Pydantic Settings from .env
+│   ├── llm.py                # OpenAI SDK wrapper (configurable base_url)
+│   ├── weather.py            # Met Office DataHub daily forecast client
+│   ├── geocode.py            # Postcode validation + postcodes.io geocoding
+│   ├── prompts.py            # Prompt templates + season detection
+│   ├── models.py             # Pydantic request/response models
+│   ├── cache.py              # Regional plant list cache + Trefle enrichment
+│   ├── perenual.py           # Trefle API client for plant search
+│   └── static/               # Watercolour header image
+├── templates/
+│   └── index.html            # Web UI (SSE, task tracking, all sections)
+├── .cache/                   # Generated: plant lists + recommendation cache
 ├── .env.example
 ├── pyproject.toml
 ├── SPEC.md

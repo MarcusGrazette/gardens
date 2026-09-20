@@ -16,6 +16,8 @@ class Action(BaseModel):
     detail: str
     category: str
     urgent: bool = False
+    why_now: str | None = None
+    minutes: int | None = None
 
 
 class Inference(BaseModel):
@@ -25,9 +27,16 @@ class Inference(BaseModel):
     reasoning: str
 
 
+class PlantSuggestion(BaseModel):
+    name: str
+    latin: str | None = None
+    note: str | None = None
+
+
 class RecommendationResponse(BaseModel):
     week: str
+    summary: str | None = None
     actions: list[Action]
     inferences: list[Inference] = []
-    plant_suggestions: list[str] = []
+    plant_suggestions: list[PlantSuggestion] = []
     notes: str | None = None

@@ -174,8 +174,9 @@ async def recommendations_stream(postcode: str):
         known_names = {p["name"].lower() for p in all_plants}
         extra_names = _extract_extra_plants(result.get("actions", []), known_names)
         for s in result.get("plant_suggestions", []):
-            if s.lower() not in known_names and s.lower() not in extra_names:
-                extra_names.append(s.lower())
+            sname = s["name"].lower() if isinstance(s, dict) else s.lower()
+            if sname not in known_names and sname not in extra_names:
+                extra_names.append(sname)
         if extra_names:
             import asyncio
             extras = await asyncio.gather(*[

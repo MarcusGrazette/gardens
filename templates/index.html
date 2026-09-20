@@ -4,80 +4,127 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>This Week in the Garden</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #F4F4F4;
-      --bg-card: #ffffff;
-      --text: #594433;
-      --text-muted: #A68C69;
-      --border: #e0d8cd;
-      --accent: #9BA657;
-      --accent-dark: #7d8545;
-      --accent-bg: #f3f4e8;
-      --warm: #F0E5C9;
-      --warm-dark: #A68C69;
-      --brown: #594433;
-      --brown-light: #7a6350;
-      --amber-50: #fdf6e3;
-      --amber-700: #b45309;
-      --red-50: #fef2f2;
-      --red-600: #dc2626;
-      --slate-50: #f8f7f5;
-      --slate-100: #f0ece6;
-      --slate-200: #e0d8cd;
-      --slate-600: #7a6350;
-      --slate-700: #594433;
-      --slate-800: #3d2e22;
+      --paper: #FAF8F3;
+      --desk: #EDE9E0;
+      --wash: #F2EFE6;
+      --card: #FFFFFF;
+      --line: #E6DFD4;
+      --ink: #33281E;
+      --ink-soft: #7A6350;
+      --muted: #A68C69;
+      --sage: #7D8545;
+      --sage-bright: #9BA657;
+      --sage-pale: #C9CFA8;
+      --sage-wash: #EFF1E3;
+      --cream: #F0E5C9;
+      --alert: #B4472E;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--desk);
+      color: var(--ink-soft);
+      font-size: 14px;
       line-height: 1.6;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      max-width: 640px;
+    .col {
+      max-width: 420px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 0 16px 48px;
     }
 
-    header {
-      text-align: center;
-      padding: 0 0 32px;
+    .mono {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
     }
 
-    .header-img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 20px;
+    .serif { font-family: 'Newsreader', Georgia, serif; }
+
+    /* Masthead */
+    .masthead {
+      position: relative;
+      margin: 0 -16px;
+      padding: 0 16px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 28px;
+      overflow: hidden;
     }
 
-    header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--brown);
-      margin-bottom: 4px;
+    .masthead-bg {
+      position: absolute;
+      inset: 0;
+      background: url('/static/Gemini_Generated_Image_4qteie4qteie4qte.jpg') center 28% / cover no-repeat;
+      opacity: 0.85;
+      z-index: 0;
     }
 
-    header p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
+    .masthead-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+        rgba(250,248,243,.3) 0%,
+        rgba(250,248,243,.72) 38%,
+        rgba(250,248,243,.94) 72%,
+        #FAF8F3 100%);
+      z-index: 1;
     }
 
-    .form-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+    .masthead-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .masthead-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .masthead h1 {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 42px;
+      font-weight: 400;
+      line-height: 1.02;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .masthead h1 em {
+      color: var(--sage);
+      font-style: italic;
+    }
+
+    .masthead-summary {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.45;
+      max-width: 31ch;
+    }
+
+    /* Form */
+    .form-shell {
+      background: var(--card);
+      border-radius: 28px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
     }
 
     .input-row {
@@ -87,26 +134,27 @@
 
     input[type="text"] {
       flex: 1;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 14px;
       font-family: inherit;
+      color: var(--ink);
       outline: none;
+      background: var(--paper);
       transition: border-color 0.15s;
-      color: var(--text);
     }
 
-    input[type="text"]:focus { border-color: var(--accent); }
-    input[type="text"]::placeholder { color: #bbb; }
+    input[type="text"]:focus { border-color: var(--sage); }
+    input[type="text"]::placeholder { color: var(--muted); }
 
-    button {
-      padding: 12px 24px;
-      background: var(--accent);
+    .btn {
+      padding: 10px 20px;
+      background: var(--sage);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      border-radius: 12px;
+      font-size: 14px;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
@@ -114,32 +162,46 @@
       white-space: nowrap;
     }
 
-    button:hover { background: var(--accent-dark); }
-    button:disabled { background: #bbb; cursor: not-allowed; }
+    .btn:hover { background: var(--ink); }
+    .btn:disabled { background: var(--line); cursor: not-allowed; color: var(--muted); }
 
-    /* Progress */
-    #progress { display: none; margin-bottom: 24px; }
+    .btn-outline {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px solid var(--line);
+    }
+
+    .btn-outline:hover { background: var(--wash); }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+
+    /* Progress (SSE loading) */
+    #progress { display: none; margin-bottom: 16px; }
     #progress.active { display: block; }
 
     .progress-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
     }
 
     .progress-bar-track {
-      height: 6px;
-      background: var(--warm);
-      border-radius: 3px;
-      margin-bottom: 20px;
+      height: 4px;
+      background: var(--line);
+      border-radius: 2px;
+      margin-bottom: 16px;
       overflow: hidden;
     }
 
     .progress-bar-fill {
       height: 100%;
-      background: var(--accent);
-      border-radius: 3px;
+      background: var(--sage);
+      border-radius: 2px;
       width: 0%;
       transition: width 0.4s ease;
     }
@@ -147,201 +209,576 @@
     .steps { list-style: none; }
 
     .steps li {
-      padding: 6px 0;
-      font-size: 0.9rem;
-      color: var(--text-muted);
+      padding: 5px 0;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
+    .steps li .step-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+    }
+
+    .steps li.done .step-label { color: var(--sage); }
+    .steps li.active .step-label { color: var(--ink-soft); }
+
     .steps li .icon {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 12px;
+      color: var(--sage);
     }
 
-    .steps li.done { color: var(--accent-dark); }
-    .steps li.active { color: var(--text); font-weight: 500; }
-
     .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--warm);
-      border-top-color: var(--accent);
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--line);
+      border-top-color: var(--sage);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Results */
+    /* Error */
+    .error-msg {
+      background: #fef2f2;
+      color: var(--alert);
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    /* Results shell */
     #results { display: none; }
     #results.active { display: block; }
 
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+    /* Forecast strip */
+    .forecast-strip {
+      background: var(--wash);
+      border-radius: 18px;
+      padding: 16px;
       margin-bottom: 16px;
     }
 
-    .results-header h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--brown);
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
     }
 
-    .results-header .week {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+    .forecast-day .day-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      margin-bottom: 4px;
     }
 
-    .action-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 10px;
+    .forecast-day .rain-track {
+      height: 44px;
+      background: var(--line);
+      border-radius: 4px;
+      position: relative;
+      margin-bottom: 4px;
       overflow: hidden;
-      transition: box-shadow 0.15s;
     }
 
-    .action-card:hover {
-      box-shadow: 0 2px 8px rgba(89, 68, 51, 0.08);
+    .forecast-day .rain-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--sage-bright);
+      border-radius: 0 0 4px 4px;
+      transition: height 0.3s ease;
     }
 
-    .action-card.urgent { border-left: 3px solid var(--amber-700); }
+    .forecast-day .temp {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+    }
 
-    .action-body {
+    .forecast-day .rain-pct {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9.5px;
+      color: var(--muted);
+    }
+
+    .frost-label {
+      margin-top: 10px;
+      text-align: right;
+    }
+
+    .frost-label.safe { color: var(--muted); }
+    .frost-label.risk { color: var(--alert); }
+
+    /* Completion ring */
+    .completion-row {
       display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      margin-bottom: 8px;
     }
 
-    .action-thumb {
-      width: 100px;
-      min-height: 100%;
-      object-fit: cover;
+    .ring-wrap {
       flex-shrink: 0;
-      background: var(--warm);
-      display: block;
+      width: 56px;
+      height: 56px;
     }
 
-    .action-content {
-      flex: 1;
-      min-width: 0;
-      padding: 16px 20px;
+    .ring-wrap svg {
+      transform: rotate(-90deg);
     }
 
-    .action-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
+    .ring-track { stroke: var(--line); fill: none; }
+    .ring-arc { stroke: var(--sage); fill: none; stroke-linecap: round; transition: stroke-dasharray 0.4s ease; }
+
+    .ring-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      fill: var(--ink);
+    }
+
+    .completion-info { flex: 1; min-width: 0; }
+
+    .completion-line {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.3;
       margin-bottom: 6px;
     }
 
-    .action-title { font-weight: 600; font-size: 0.95rem; }
-
-    .plant-name {
-      border-bottom: 1px dotted var(--text-muted);
-      cursor: help;
+    .history-strip {
+      display: flex;
+      gap: 3px;
+      align-items: flex-end;
+      margin-bottom: 4px;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      white-space: nowrap;
-      flex-shrink: 0;
+    .history-seg {
+      width: 16px;
+      height: 12px;
+      border-radius: 3px;
+      background: var(--line);
     }
 
-    .badge-urgent { background: var(--amber-50); color: var(--amber-700); }
-    .badge-category { background: var(--accent-bg); color: var(--accent-dark); }
+    .history-seg.current { background: var(--sage); }
 
-    .action-detail {
-      font-size: 0.88rem;
-      color: var(--text-muted);
+    /* Lead task */
+    .lead-task {
+      background: var(--card);
+      border-radius: 28px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .lead-kicker {
+      padding: 18px 20px 0;
+    }
+
+    .lead-img {
+      width: 100%;
+      height: 176px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .lead-img-placeholder {
+      width: 100%;
+      height: 176px;
+      background: var(--cream);
+      background-image: repeating-linear-gradient(135deg, rgba(166,140,105,.22) 0 2px, transparent 2px 9px);
+    }
+
+    .lead-body { padding: 18px 20px; }
+
+    .lead-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 27px;
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .lead-detail {
+      font-size: 14px;
+      color: var(--ink-soft);
       line-height: 1.5;
+      margin-bottom: 14px;
     }
 
-    .priority-num {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: white;
-      background: var(--accent);
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-right: 6px;
-      position: relative;
-      top: -1px;
-    }
-
-    .section-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 10px;
-    }
-
-    .section-card h3 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
-
-    .inference {
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.88rem;
-    }
-
-    .inference:last-child { border-bottom: none; }
-    .inference-field { font-weight: 600; text-transform: capitalize; }
-    .inference-reasoning { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
-
-    .plant-list { display: flex; flex-wrap: wrap; gap: 6px; }
-
-    .plant-tag {
-      background: var(--accent-bg);
-      color: var(--accent-dark);
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 500;
-    }
-
-    .notes {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    .error-msg {
-      background: var(--red-50);
-      color: var(--red-600);
-      padding: 16px 20px;
-      border-radius: 10px;
-      font-size: 0.9rem;
+    .why-now {
+      background: var(--wash);
+      border-radius: 12px;
+      padding: 14px 16px;
       margin-bottom: 16px;
     }
 
+    .why-now-label {
+      margin-bottom: 6px;
+    }
+
+    .why-now-text {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+
+    .lead-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lead-actions .btn-done { flex: 1; }
+
+    /* Task list */
+    .task-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0 14px;
+    }
+
+    .task-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .task-row {
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .task-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .task-thumb-placeholder {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      background: var(--cream);
+      background-image: repeating-linear-gradient(135deg, rgba(166,140,105,.22) 0 2px, transparent 2px 9px);
+    }
+
+    .task-content { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .task-detail {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .chip-category {
+      background: var(--sage-wash);
+      color: var(--sage);
+    }
+
+    .chip-urgent {
+      background: #fef2f2;
+      color: var(--alert);
+    }
+
+    .task-meta .spacer { flex: 1; }
+
+    .task-meta .task-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Plant name tooltips */
+    .plant-name {
+      border-bottom: 1px dotted var(--muted);
+      cursor: help;
+    }
+
+    /* Done / Deferred panels */
+    .panel-done, .panel-deferred {
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .panel-done { background: var(--sage-wash); }
+    .panel-deferred { background: var(--wash); }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .panel-header .chevron {
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+
+    .panel-header.open .chevron { transform: rotate(90deg); }
+
+    .panel-body { display: none; }
+    .panel-body.open { display: block; }
+
+    .panel-task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .panel-task:last-child { border-bottom: none; }
+
+    .panel-task-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink-soft);
+    }
+
+    .panel-done .panel-task-title { text-decoration: line-through; color: var(--muted); }
+
+    /* Inferences */
+    .inferences-panel {
+      background: var(--ink);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .inferences-panel .section-label {
+      color: var(--cream);
+      margin-bottom: 14px;
+    }
+
+    .inference {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(240,229,201,.12);
+    }
+
+    .inference:last-child { border-bottom: none; }
+
+    .inference-value {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--cream);
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .inference-conf {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 9.5px;
+      font-weight: 500;
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      background: rgba(240,229,201,.15);
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .inference-reasoning {
+      font-size: 12.5px;
+      color: rgba(240,229,201,.55);
+      line-height: 1.4;
+    }
+
+    .btn-correct {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid rgba(240,229,201,.25);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-correct:hover { background: rgba(240,229,201,.08); }
+
+    /* Plant suggestions */
+    .plants-section {
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .plants-section .section-label { margin-bottom: 14px; }
+
+    .plant-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .plant-row:last-child { border-bottom: none; }
+
+    .plant-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .plant-thumb-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      background: var(--cream);
+      background-image: repeating-linear-gradient(135deg, rgba(166,140,105,.22) 0 2px, transparent 2px 9px);
+    }
+
+    .plant-info { flex: 1; min-width: 0; }
+
+    .plant-common {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+
+    .plant-latin {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+    }
+
+    .plant-note {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 500;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.06em;
+      background: var(--sage-wash);
+      color: var(--sage);
+      flex-shrink: 0;
+    }
+
+    .btn-see-all {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn-see-all:hover { background: var(--wash); }
+
+    /* Notes */
+    .note-panel {
+      background: var(--wash);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .note-text {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 17px;
+      line-height: 1.45;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 16px 0;
+    }
+
     /* Debug panel */
-    #debug-panel { display: none; margin-top: 32px; }
+    #debug-panel { display: none; margin-top: 24px; }
     #debug-panel.active { display: block; }
 
     .debug-toggle {
@@ -349,24 +786,26 @@
       align-items: center;
       gap: 6px;
       padding: 8px 14px;
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
+      background: var(--wash);
+      border: 1px solid var(--line);
       border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--slate-700);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--muted);
       cursor: pointer;
       margin-bottom: 16px;
-      font-family: inherit;
     }
 
-    .debug-toggle:hover { background: var(--slate-200); }
+    .debug-toggle:hover { background: var(--line); }
 
     .debug-section {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 10px;
-      margin-bottom: 12px;
+      background: var(--wash);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin-bottom: 10px;
       overflow: hidden;
     }
 
@@ -379,19 +818,20 @@
       user-select: none;
     }
 
-    .debug-section-header:hover { background: var(--slate-100); }
+    .debug-section-header:hover { background: var(--line); }
 
     .debug-section-header h4 {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--slate-600);
+      letter-spacing: 0.10em;
+      color: var(--muted);
     }
 
     .debug-section-header .chevron {
-      font-size: 0.75rem;
-      color: var(--slate-600);
+      font-size: 10px;
+      color: var(--muted);
       transition: transform 0.2s;
     }
 
@@ -405,23 +845,24 @@
     .debug-section-body.open { display: block; }
 
     .debug-label {
-      font-size: 0.72rem;
-      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--slate-600);
+      letter-spacing: 0.10em;
+      color: var(--muted);
       margin: 12px 0 4px;
     }
 
     .debug-label:first-child { margin-top: 0; }
 
     .debug-pre {
-      background: var(--slate-800);
-      color: #e2e8f0;
+      background: var(--ink);
+      color: var(--cream);
       padding: 12px 14px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
       line-height: 1.5;
       overflow-x: auto;
       white-space: pre-wrap;
@@ -432,22 +873,33 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img class="header-img" src="/static/Gemini_Generated_Image_4qteie4qteie4qte.jpg" alt="">
-      <h1>This Week in the Garden</h1>
-      <p>Personalised gardening actions for your week</p>
-    </header>
+  <div class="col">
 
-    <div class="form-card">
+    <!-- Masthead -->
+    <div class="masthead">
+      <div class="masthead-bg"></div>
+      <div class="masthead-scrim"></div>
+      <div class="masthead-content">
+        <div class="masthead-meta">
+          <span class="mono" id="masthead-week"></span>
+          <span class="mono" id="masthead-location"></span>
+        </div>
+        <h1>This Week in<br><em>the Garden</em></h1>
+        <p class="masthead-summary" id="masthead-summary">Personalised gardening actions for your week</p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-shell">
       <form id="form">
         <div class="input-row">
-          <input type="text" id="postcode" name="postcode" placeholder="Enter your postcode, e.g. SE15 4QN" autocomplete="postal-code" required>
-          <button type="submit" id="submit-btn">Go</button>
+          <input type="text" id="postcode" name="postcode" placeholder="Enter your postcode" autocomplete="postal-code" required>
+          <button type="submit" id="submit-btn" class="btn">Go</button>
         </div>
       </form>
     </div>
 
+    <!-- SSE Progress -->
     <div id="progress">
       <div class="progress-card">
         <div class="progress-bar-track">
@@ -458,10 +910,13 @@
     </div>
 
     <div id="error"></div>
+
+    <!-- Results -->
     <div id="results"></div>
 
+    <!-- Debug (gated) -->
     <div id="debug-panel">
-      <button class="debug-toggle" id="debug-toggle-btn">&#9881; Debug info</button>
+      <button class="debug-toggle" id="debug-toggle-btn">Debug info</button>
       <div id="debug-content" style="display:none"></div>
     </div>
   </div>
@@ -477,6 +932,8 @@
       'Generating your garden plan',
     ];
 
+    const SHOW_DEBUG = new URLSearchParams(window.location.search).has('debug');
+
     const form = document.getElementById('form');
     const postcodeInput = document.getElementById('postcode');
     const submitBtn = document.getElementById('submit-btn');
@@ -488,17 +945,83 @@
     const debugPanel = document.getElementById('debug-panel');
     const debugContent = document.getElementById('debug-content');
     const debugToggleBtn = document.getElementById('debug-toggle-btn');
+    const mastheadWeek = document.getElementById('masthead-week');
+    const mastheadLocation = document.getElementById('masthead-location');
+    const mastheadSummary = document.getElementById('masthead-summary');
 
     let debugData = {};
+    let weatherDays = [];
+    let locationName = '';
+    let taskState = {};
+    let currentWeek = '';
+    let currentPostcode = '';
+    let allActions = [];
+    let plantLookup = {};
+
+    // localStorage helpers
+    function stateKey() { return 'garden_' + currentPostcode.replace(/\s/g,'_').toLowerCase() + '_' + currentWeek; }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(stateKey());
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          taskState = parsed.tasks || {};
+          return;
+        }
+      } catch(e) {}
+      taskState = {};
+    }
+
+    function saveState() {
+      try {
+        const history = loadHistory();
+        const total = allActions.length;
+        const done = Object.values(taskState).filter(v => v === 'done').length;
+        const idx = history.findIndex(h => h.week === currentWeek);
+        if (idx >= 0) history[idx] = { week: currentWeek, done, total };
+        else history.push({ week: currentWeek, done, total });
+        if (history.length > 8) history.splice(0, history.length - 8);
+        localStorage.setItem(stateKey(), JSON.stringify({ tasks: taskState, history }));
+      } catch(e) {}
+    }
+
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(stateKey());
+        if (raw) return JSON.parse(raw).history || [];
+      } catch(e) {}
+      return [];
+    }
+
+    // Season helper
+    function seasonLabel() {
+      const m = new Date().getMonth() + 1;
+      const seasons = { spring: [3,4,5], summer: [6,7,8], autumn: [9,10,11], winter: [12,1,2] };
+      let season = 'spring';
+      for (const [name, months] of Object.entries(seasons)) {
+        if (months.includes(m)) { season = name; break; }
+      }
+      const pos = [3,6,9,12].includes(m) ? 'Early' : [5,8,11,2].includes(m) ? 'Late' : 'Mid';
+      return pos + ' ' + season;
+    }
+
+    // Week number
+    function isoWeek(d) {
+      const date = new Date(d);
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      const week1 = new Date(date.getFullYear(), 0, 4);
+      return 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    }
 
     debugToggleBtn.addEventListener('click', () => {
-      const content = debugContent;
-      if (content.style.display === 'none') {
-        content.style.display = 'block';
-        debugToggleBtn.textContent = '✕ Hide debug info';
+      if (debugContent.style.display === 'none') {
+        debugContent.style.display = 'block';
+        debugToggleBtn.textContent = 'Hide debug';
       } else {
-        content.style.display = 'none';
-        debugToggleBtn.textContent = '⚙ Debug info';
+        debugContent.style.display = 'none';
+        debugToggleBtn.textContent = 'Debug info';
       }
     });
 
@@ -507,6 +1030,7 @@
       const postcode = postcodeInput.value.trim();
       if (!postcode) return;
 
+      currentPostcode = postcode;
       submitBtn.disabled = true;
       progressEl.classList.add('active');
       resultsEl.classList.remove('active');
@@ -517,10 +1041,14 @@
       debugPanel.classList.remove('active');
       debugContent.innerHTML = '';
       debugContent.style.display = 'none';
-      debugToggleBtn.textContent = '⚙ Debug info';
+      debugToggleBtn.textContent = 'Debug info';
       debugData = {};
+      weatherDays = [];
 
-      const source = new EventSource(`/recommendations/stream?postcode=${encodeURIComponent(postcode)}`);
+      const wn = isoWeek(new Date());
+      mastheadWeek.textContent = 'Week ' + wn + ' · ' + seasonLabel();
+
+      const source = new EventSource('/recommendations/stream?postcode=' + encodeURIComponent(postcode));
 
       source.addEventListener('step', (e) => {
         const data = JSON.parse(e.data);
@@ -530,18 +1058,25 @@
         stepsEl.querySelectorAll('li.active').forEach(li => {
           li.classList.remove('active');
           li.classList.add('done');
-          li.querySelector('.icon').innerHTML = '&#10003;';
+          li.querySelector('.icon').innerHTML = '✓';
         });
 
         const li = document.createElement('li');
         li.classList.add('active');
-        li.innerHTML = `<span class="icon"><span class="spinner"></span></span> ${data.label}`;
+        li.innerHTML = '<span class="icon"><span class="spinner"></span></span> <span class="step-label">' + esc(data.label) + '</span>';
         stepsEl.appendChild(li);
       });
 
       source.addEventListener('debug', (e) => {
         const data = JSON.parse(e.data);
         debugData[data.section] = data.data;
+        if (data.section === 'geocode' && data.data) {
+          locationName = data.data.admin_district || data.data.region || '';
+          mastheadLocation.textContent = locationName;
+        }
+        if (data.section === 'weather' && data.data && data.data.raw_days) {
+          weatherDays = data.data.raw_days;
+        }
       });
 
       source.addEventListener('done', (e) => {
@@ -551,14 +1086,14 @@
         stepsEl.querySelectorAll('li.active').forEach(li => {
           li.classList.remove('active');
           li.classList.add('done');
-          li.querySelector('.icon').innerHTML = '&#10003;';
+          li.querySelector('.icon').innerHTML = '✓';
         });
 
         setTimeout(() => {
           progressEl.classList.remove('active');
           const data = JSON.parse(e.data);
           renderResults(data);
-          renderDebugPanel();
+          if (SHOW_DEBUG) renderDebugPanel();
           submitBtn.disabled = false;
         }, 500);
       });
@@ -566,9 +1101,9 @@
       source.addEventListener('error', (e) => {
         if (e.data) {
           const data = JSON.parse(e.data);
-          errorEl.innerHTML = `<div class="error-msg">${data.message}</div>`;
+          errorEl.innerHTML = '<div class="error-msg">' + esc(data.message) + '</div>';
         } else {
-          errorEl.innerHTML = `<div class="error-msg">Connection lost. Please try again.</div>`;
+          errorEl.innerHTML = '<div class="error-msg">Connection lost. Please try again.</div>';
         }
         source.close();
         progressEl.classList.remove('active');
@@ -590,10 +1125,10 @@
       return lookup;
     }
 
-    function findPlantImage(text, plantLookup) {
+    function findPlantImage(text, lookup) {
       const lower = text.toLowerCase();
       const matches = [];
-      for (const [key, plant] of Object.entries(plantLookup)) {
+      for (const [key, plant] of Object.entries(lookup)) {
         const pos = lower.indexOf(key);
         if (pos !== -1) matches.push({ pos, plant });
       }
@@ -604,142 +1139,473 @@
       return null;
     }
 
-    function annotatePlantNames(text, plantLookup) {
+    function annotatePlantNames(text, lookup) {
       let annotated = esc(text);
-      const entries = Object.entries(plantLookup)
+      const entries = Object.entries(lookup)
         .filter(([, p]) => p.latin)
         .sort((a, b) => b[0].length - a[0].length);
       for (const [key, plant] of entries) {
-        const re = new RegExp(`(?<![\\w-])(${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![\\w-])`, 'gi');
-        annotated = annotated.replace(re, `<span class="plant-name" title="${esc(plant.latin)}">$1</span>`);
+        const re = new RegExp('(?<![\\w-])(' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![\\w-])', 'gi');
+        annotated = annotated.replace(re, '<span class="plant-name" title="' + esc(plant.latin) + '">$1</span>');
       }
       return annotated;
     }
 
     function renderResults(data) {
       resultsEl.classList.add('active');
-      const plantLookup = buildPlantLookup(data.regional_plants);
+      plantLookup = buildPlantLookup(data.regional_plants);
+      allActions = data.actions || [];
+      currentWeek = data.week || '';
+      loadState();
+
+      if (data.summary) {
+        mastheadSummary.textContent = data.summary;
+      }
+
       let html = '';
 
-      html += `<div class="results-header">
-        <h2>Your garden plan</h2>
-        <span class="week">${data.week || ''}</span>
-      </div>`;
+      // Forecast strip
+      if (weatherDays.length > 0) {
+        html += renderForecastStrip(weatherDays);
+      }
 
-      if (data.actions) {
-        for (const action of data.actions) {
-          const urgentClass = action.urgent ? ' urgent' : '';
-          const urgentBadge = action.urgent ? '<span class="badge badge-urgent">Urgent</span>' : '';
-          const categoryBadge = action.category ? `<span class="badge badge-category">${action.category.replace(/-/g, ' ')}</span>` : '';
+      // Completion ring
+      html += '<div id="completion-area"></div>';
 
-          const matched = findPlantImage(action.title + ' ' + action.detail, plantLookup);
-          const thumbHtml = matched && matched.thumbnail
-            ? `<img class="action-thumb" src="${matched.thumbnail}" alt="">`
-            : '';
+      // Split actions by state
+      const live = [];
+      const done = [];
+      const deferred = [];
+      for (const action of allActions) {
+        const st = taskState[action.priority];
+        if (st === 'done') done.push(action);
+        else if (st === 'deferred' || st === 'skipped') deferred.push(action);
+        else live.push(action);
+      }
 
-          const titleHtml = annotatePlantNames(action.title, plantLookup);
-          const detailHtml = annotatePlantNames(action.detail, plantLookup);
+      // Lead task
+      if (live.length > 0) {
+        html += renderLeadTask(live[0]);
+      }
 
-          html += `<div class="action-card${urgentClass}">
-            <div class="action-body">
-              ${thumbHtml}
-              <div class="action-content">
-                <div class="action-top">
-                  <div class="action-title"><span class="priority-num">${action.priority}</span>${titleHtml}</div>
-                  <div>${urgentBadge}</div>
-                </div>
-                <div class="action-detail">${detailHtml}</div>
-                <div style="margin-top: 6px">${categoryBadge}</div>
-              </div>
-            </div>
-          </div>`;
+      // Remaining tasks
+      if (live.length > 1) {
+        html += '<div class="task-divider"><span class="mono">Then, when you have time</span></div>';
+        for (let i = 1; i < live.length; i++) {
+          html += renderTaskRow(live[i]);
         }
       }
 
+      // Done panel
+      html += '<div id="done-panel"></div>';
+      // Deferred panel
+      html += '<div id="deferred-panel"></div>';
+
+      // Inferences
       if (data.inferences && data.inferences.length > 0) {
-        html += `<div class="section-card"><h3>What we inferred about your garden</h3>`;
-        for (const inf of data.inferences) {
-          const val = Array.isArray(inf.value) ? inf.value.join(', ') : inf.value;
-          html += `<div class="inference">
-            <div><span class="inference-field">${inf.field.replace(/_/g, ' ')}:</span> ${val} <span class="badge badge-category">${inf.confidence}</span></div>
-            <div class="inference-reasoning">${inf.reasoning}</div>
-          </div>`;
-        }
-        html += `</div>`;
+        html += renderInferences(data.inferences);
       }
 
+      // Plant suggestions
       if (data.plant_suggestions && data.plant_suggestions.length > 0) {
-        html += `<div class="section-card"><h3>Plant suggestions</h3><div class="plant-list">`;
-        for (const p of data.plant_suggestions) {
-          const match = plantLookup[p.toLowerCase()];
-          const tooltip = match && match.latin ? ` title="${esc(match.latin)}"` : '';
-          html += `<span class="plant-tag"${tooltip}>${esc(p)}</span>`;
-        }
-        html += `</div></div>`;
+        html += renderPlantSuggestions(data.plant_suggestions);
       }
 
+      // Note
       if (data.notes) {
-        html += `<div class="section-card"><p class="notes">${data.notes}</p></div>`;
+        const weekNum = currentWeek.replace(/.*W/, '');
+        html += '<div class="note-panel">'
+          + '<p class="note-text">' + esc(data.notes) + '</p>'
+          + '<span class="mono">Note for week ' + esc(weekNum) + '</span>'
+          + '</div>';
       }
+
+      // Footer
+      html += '<div class="footer"><span class="mono">Met Office · postcodes.io · ' + esc(currentPostcode.toUpperCase()) + '</span></div>';
 
       resultsEl.innerHTML = html;
+      renderCompletionRing();
+      renderStatePanels();
+      wireTaskButtons();
+    }
+
+    function renderForecastStrip(days) {
+      let frostDay = null;
+      let cells = '';
+      const dayNames = ['S','M','T','W','T','F','S'];
+      const fullDayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+      for (let i = 0; i < Math.min(7, days.length); i++) {
+        const d = days[i];
+        const dt = new Date(d.time);
+        const dayInit = dayNames[dt.getDay()];
+        const high = d.dayMaxScreenTemperature ?? d.maxScreenAirTemp ?? '';
+        const nightMin = d.nightMinScreenTemperature ?? d.minScreenAirTemp ?? null;
+        const rain = d.dayProbabilityOfPrecipitation ?? d.probOfPrecipitation ?? 0;
+        const rainH = Math.max(2, Math.round((rain / 100) * 44));
+
+        if (nightMin !== null && nightMin <= 2 && !frostDay) {
+          frostDay = fullDayNames[dt.getDay()];
+        }
+
+        cells += '<div class="forecast-day">'
+          + '<div class="day-label">' + dayInit + '</div>'
+          + '<div class="rain-track"><div class="rain-fill" style="height:' + rainH + 'px"></div></div>'
+          + '<div class="temp">' + (high !== '' ? Math.round(high) + '°' : '') + '</div>'
+          + '<div class="rain-pct">' + rain + '%</div>'
+          + '</div>';
+      }
+
+      const frostHtml = frostDay
+        ? '<div class="frost-label risk mono">Frost ' + frostDay + ' night</div>'
+        : '<div class="frost-label safe mono">No frost risk</div>';
+
+      return '<div class="forecast-strip">'
+        + '<div class="forecast-grid">' + cells + '</div>'
+        + frostHtml
+        + '</div>';
+    }
+
+    function renderCompletionRing() {
+      const area = document.getElementById('completion-area');
+      if (!area) return;
+      const total = allActions.length;
+      const doneCount = Object.values(taskState).filter(v => v === 'done').length;
+      const pct = total > 0 ? doneCount / total : 0;
+      const C = 2 * Math.PI * 24;
+      const arc = C * pct;
+
+      let msg = 'Nothing ticked off yet.';
+      if (doneCount > 0 && doneCount < total) msg = doneCount + ' of ' + total + ' done. Keep going.';
+      if (doneCount === total && total > 0) msg = 'Week complete. Well gardened.';
+
+      const history = loadHistory();
+      let histHtml = '<div class="history-strip">';
+      for (let i = Math.max(0, history.length - 8); i < history.length; i++) {
+        const h = history[i];
+        const isCurrent = h.week === currentWeek;
+        const opacity = h.total > 0 ? Math.max(0.2, h.done / h.total) : 0.2;
+        const style = isCurrent ? '' : ' style="opacity:' + opacity + '"';
+        histHtml += '<div class="history-seg' + (isCurrent ? ' current' : '') + '"' + style + '></div>';
+      }
+      if (history.length === 0) {
+        histHtml += '<div class="history-seg current"></div>';
+      }
+      histHtml += '</div>';
+
+      let lifetime = 0;
+      for (const h of history) lifetime += h.done;
+      lifetime += doneCount;
+
+      area.innerHTML = '<div class="completion-row">'
+        + '<div class="ring-wrap">'
+        + '<svg viewBox="0 0 56 56" width="56" height="56">'
+        + '<circle class="ring-track" cx="28" cy="28" r="24" stroke-width="5"/>'
+        + '<circle class="ring-arc" cx="28" cy="28" r="24" stroke-width="5" '
+        + 'stroke-dasharray="' + arc.toFixed(1) + ' ' + C.toFixed(1) + '"/>'
+        + '<text class="ring-text" x="28" y="28" text-anchor="middle" dominant-baseline="central" '
+        + 'transform="rotate(90 28 28)">' + doneCount + '/' + total + '</text>'
+        + '</svg>'
+        + '</div>'
+        + '<div class="completion-info">'
+        + '<div class="completion-line">' + msg + '</div>'
+        + histHtml
+        + '<span class="mono">' + lifetime + ' tasks lifetime</span>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function renderLeadTask(action) {
+      const matched = findPlantImage(action.title + ' ' + action.detail, plantLookup);
+      const imgHtml = matched && matched.thumbnail
+        ? '<img class="lead-img" src="' + esc(matched.thumbnail) + '" alt="">'
+        : '<div class="lead-img-placeholder"></div>';
+
+      const kickerText = action.urgent
+        ? 'Do this first · closing window'
+        : 'Do this first';
+      const kickerClass = action.urgent ? 'alert' : 'muted';
+
+      const titleHtml = annotatePlantNames(action.title, plantLookup);
+      const detailHtml = annotatePlantNames(action.detail, plantLookup);
+
+      let whyNowHtml = '';
+      if (action.why_now) {
+        whyNowHtml = '<div class="why-now">'
+          + '<div class="mono why-now-label">Why now</div>'
+          + '<p class="why-now-text">' + esc(action.why_now) + '</p>'
+          + '</div>';
+      }
+
+      return '<div class="lead-task" data-priority="' + action.priority + '">'
+        + '<div class="lead-kicker"><span class="mono" style="color:var(--' + kickerClass + ')">' + kickerText + '</span></div>'
+        + imgHtml
+        + '<div class="lead-body">'
+        + '<h2 class="lead-title">' + titleHtml + '</h2>'
+        + '<p class="lead-detail">' + detailHtml + '</p>'
+        + whyNowHtml
+        + '<div class="lead-actions">'
+        + '<button class="btn btn-done lead-done-btn" data-p="' + action.priority + '">✓ Mark done</button>'
+        + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="defer">Snooze</button>'
+        + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="skip">Skip</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function renderTaskRow(action) {
+      const matched = findPlantImage(action.title + ' ' + action.detail, plantLookup);
+      const thumbHtml = matched && matched.thumbnail
+        ? '<img class="task-thumb" src="' + esc(matched.thumbnail) + '" alt="">'
+        : '<div class="task-thumb-placeholder"></div>';
+
+      const titleHtml = annotatePlantNames(action.title, plantLookup);
+      const detailHtml = annotatePlantNames(action.detail, plantLookup);
+      const catLabel = action.category ? action.category.replace(/-/g, ' ') : '';
+      const minutesHtml = action.minutes ? '<span class="mono">' + action.minutes + ' min</span>' : '';
+
+      return '<div class="task-row" data-priority="' + action.priority + '">'
+        + thumbHtml
+        + '<div class="task-content">'
+        + '<div class="task-title">' + titleHtml + '</div>'
+        + '<div class="task-detail">' + detailHtml + '</div>'
+        + '<div class="task-meta">'
+        + (catLabel ? '<span class="chip chip-category">' + esc(catLabel) + '</span>' : '')
+        + minutesHtml
+        + '<span class="spacer"></span>'
+        + '<div class="task-btns">'
+        + '<button class="btn btn-outline btn-sm" data-p="' + action.priority + '" data-act="defer">Snooze</button>'
+        + '<button class="btn btn-sm" data-p="' + action.priority + '" data-act="done">✓ Done</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function renderStatePanels() {
+      const donePanel = document.getElementById('done-panel');
+      const deferPanel = document.getElementById('deferred-panel');
+      if (!donePanel || !deferPanel) return;
+
+      const doneActions = allActions.filter(a => taskState[a.priority] === 'done');
+      const deferredActions = allActions.filter(a => taskState[a.priority] === 'deferred' || taskState[a.priority] === 'skipped');
+
+      if (doneActions.length > 0) {
+        let h = '<div class="panel-done">'
+          + '<div class="panel-header open" data-panel="done-body"><span class="mono">Done · ' + doneActions.length + '</span><span class="chevron">&#9654;</span></div>'
+          + '<div class="panel-body open" id="done-body">';
+        for (const a of doneActions) {
+          h += '<div class="panel-task"><span class="panel-task-title">' + esc(a.title) + '</span>'
+            + '<button class="btn btn-outline btn-sm" data-p="' + a.priority + '" data-act="undo">Undo</button></div>';
+        }
+        h += '</div></div>';
+        donePanel.innerHTML = h;
+      } else {
+        donePanel.innerHTML = '';
+      }
+
+      if (deferredActions.length > 0) {
+        let h = '<div class="panel-deferred">'
+          + '<div class="panel-header open" data-panel="defer-body"><span class="mono">Moved to next week · ' + deferredActions.length + '</span><span class="chevron">&#9654;</span></div>'
+          + '<div class="panel-body open" id="defer-body">';
+        for (const a of deferredActions) {
+          h += '<div class="panel-task"><span class="panel-task-title">' + esc(a.title) + '</span>'
+            + '<button class="btn btn-outline btn-sm" data-p="' + a.priority + '" data-act="undo">Undo</button></div>';
+        }
+        h += '</div></div>';
+        deferPanel.innerHTML = h;
+      } else {
+        deferPanel.innerHTML = '';
+      }
+
+      // Wire panel toggles and undo buttons
+      document.querySelectorAll('.panel-header').forEach(h => {
+        h.addEventListener('click', () => {
+          h.classList.toggle('open');
+          const body = h.nextElementSibling;
+          if (body) body.classList.toggle('open');
+        });
+      });
+
+      wireTaskButtons();
+    }
+
+    function wireTaskButtons() {
+      document.querySelectorAll('[data-act]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const p = parseInt(btn.dataset.p);
+          const act = btn.dataset.act;
+          if (act === 'done') taskState[p] = 'done';
+          else if (act === 'defer') taskState[p] = 'deferred';
+          else if (act === 'skip') taskState[p] = 'skipped';
+          else if (act === 'undo') delete taskState[p];
+          saveState();
+          rerender();
+        };
+      });
+
+      document.querySelectorAll('.lead-done-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const p = parseInt(btn.dataset.p);
+          taskState[p] = 'done';
+          saveState();
+          rerender();
+        };
+      });
+    }
+
+    function rerender() {
+      const live = [];
+      const doneActions = [];
+      const deferredActions = [];
+      for (const action of allActions) {
+        const st = taskState[action.priority];
+        if (st === 'done') doneActions.push(action);
+        else if (st === 'deferred' || st === 'skipped') deferredActions.push(action);
+        else live.push(action);
+      }
+
+      // Rebuild live task area
+      let liveHtml = '';
+      if (live.length > 0) {
+        liveHtml += renderLeadTask(live[0]);
+      }
+      if (live.length > 1) {
+        liveHtml += '<div class="task-divider"><span class="mono">Then, when you have time</span></div>';
+        for (let i = 1; i < live.length; i++) {
+          liveHtml += renderTaskRow(live[i]);
+        }
+      }
+
+      // Find the lead task in results and replace up to done-panel
+      const leadEl = resultsEl.querySelector('.lead-task');
+      const divider = resultsEl.querySelector('.task-divider');
+      const taskRows = resultsEl.querySelectorAll('.task-row');
+      const doneP = document.getElementById('done-panel');
+
+      // Remove old live tasks
+      const toRemove = [];
+      if (leadEl) toRemove.push(leadEl);
+      if (divider) toRemove.push(divider);
+      taskRows.forEach(r => toRemove.push(r));
+      toRemove.forEach(el => el.remove());
+
+      // Insert new live tasks before done-panel
+      if (doneP) {
+        const temp = document.createElement('div');
+        temp.innerHTML = liveHtml;
+        while (temp.firstChild) {
+          doneP.parentNode.insertBefore(temp.firstChild, doneP);
+        }
+      }
+
+      renderCompletionRing();
+      renderStatePanels();
+    }
+
+    function renderInferences(inferences) {
+      let html = '<div class="inferences-panel">'
+        + '<div class="mono section-label">What we know about your garden</div>';
+      for (const inf of inferences) {
+        const val = Array.isArray(inf.value) ? inf.value.join(', ') : inf.value;
+        html += '<div class="inference">'
+          + '<div class="inference-value">' + esc(val) + '</div>'
+          + '<span class="inference-conf">' + esc(inf.confidence) + '</span>'
+          + '<div class="inference-reasoning">' + esc(inf.reasoning) + '</div>'
+          + '</div>';
+      }
+      html += '<button class="btn-correct">That\'s not quite right — correct it</button>';
+      html += '</div>';
+      return html;
+    }
+
+    function renderPlantSuggestions(suggestions) {
+      const season = seasonLabel().split(' ').pop();
+      let html = '<div class="plants-section">'
+        + '<div class="mono section-label">Worth adding this ' + season + '</div>';
+
+      const showCount = 4;
+      const total = suggestions.length;
+
+      for (let i = 0; i < Math.min(showCount, total); i++) {
+        html += renderPlantRow(suggestions[i]);
+      }
+
+      // Hidden extras
+      if (total > showCount) {
+        html += '<div id="extra-plants" style="display:none">';
+        for (let i = showCount; i < total; i++) {
+          html += renderPlantRow(suggestions[i]);
+        }
+        html += '</div>';
+        html += '<button class="btn-see-all" id="see-all-plants">See all ' + total + ' suggestions</button>';
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    function renderPlantRow(suggestion) {
+      const name = typeof suggestion === 'string' ? suggestion : suggestion.name;
+      const latin = typeof suggestion === 'object' ? suggestion.latin : null;
+      const note = typeof suggestion === 'object' ? suggestion.note : null;
+      const match = plantLookup[name.toLowerCase()];
+      const thumbHtml = match && match.thumbnail
+        ? '<img class="plant-thumb" src="' + esc(match.thumbnail) + '" alt="">'
+        : '<div class="plant-thumb-placeholder"></div>';
+      const latinText = latin || (match && match.latin) || '';
+
+      return '<div class="plant-row">'
+        + thumbHtml
+        + '<div class="plant-info">'
+        + '<div class="plant-common">' + esc(name) + '</div>'
+        + (latinText ? '<div class="plant-latin">' + esc(latinText) + '</div>' : '')
+        + '</div>'
+        + (note ? '<span class="plant-note">' + esc(note) + '</span>' : '')
+        + '</div>';
     }
 
     function renderDebugPanel() {
       debugPanel.classList.add('active');
       let html = '';
 
-      // Geocode
       if (debugData.geocode) {
-        html += debugSection('Geocode', `
-          <div class="debug-label">postcodes.io response</div>
-          <pre class="debug-pre">${esc(JSON.stringify(debugData.geocode, null, 2))}</pre>
-        `);
+        html += debugSection('Geocode', '<div class="debug-label">postcodes.io response</div>'
+          + '<pre class="debug-pre">' + esc(JSON.stringify(debugData.geocode, null, 2)) + '</pre>');
       }
 
-      // Weather
       if (debugData.weather) {
-        html += debugSection('Weather forecast', `
-          <div class="debug-label">Formatted summary (sent to LLM)</div>
-          <pre class="debug-pre">${esc(debugData.weather.summary)}</pre>
-          <div class="debug-label">Raw Met Office response (first 7 days)</div>
-          <pre class="debug-pre">${esc(JSON.stringify(debugData.weather.raw_days, null, 2))}</pre>
-        `);
+        html += debugSection('Weather forecast',
+          '<div class="debug-label">Formatted summary (sent to LLM)</div>'
+          + '<pre class="debug-pre">' + esc(debugData.weather.summary) + '</pre>'
+          + '<div class="debug-label">Raw Met Office response (first 7 days)</div>'
+          + '<pre class="debug-pre">' + esc(JSON.stringify(debugData.weather.raw_days, null, 2)) + '</pre>');
       }
 
-      // Plants
       if (debugData.plants) {
         const p = debugData.plants;
-        let plantsHtml = `<div class="debug-label">Cache ${p.cache_hit ? 'HIT' : 'MISS'}</div>`;
-        plantsHtml += `<div class="debug-label">Plant list</div>
-          <pre class="debug-pre">${esc(JSON.stringify(p.plants, null, 2))}</pre>`;
+        let ph = '<div class="debug-label">Cache ' + (p.cache_hit ? 'HIT' : 'MISS') + '</div>';
+        ph += '<div class="debug-label">Plant list</div><pre class="debug-pre">' + esc(JSON.stringify(p.plants, null, 2)) + '</pre>';
         if (!p.cache_hit) {
-          plantsHtml += `<div class="debug-label">LLM system prompt</div>
-            <pre class="debug-pre">${esc(p.llm_system_prompt)}</pre>
-            <div class="debug-label">LLM user prompt</div>
-            <pre class="debug-pre">${esc(p.llm_prompt)}</pre>
-            <div class="debug-label">LLM raw response</div>
-            <pre class="debug-pre">${esc(p.llm_raw_response)}</pre>`;
+          ph += '<div class="debug-label">LLM system prompt</div><pre class="debug-pre">' + esc(p.llm_system_prompt) + '</pre>';
+          ph += '<div class="debug-label">LLM user prompt</div><pre class="debug-pre">' + esc(p.llm_prompt) + '</pre>';
+          ph += '<div class="debug-label">LLM raw response</div><pre class="debug-pre">' + esc(p.llm_raw_response) + '</pre>';
         }
-        html += debugSection('Regional plants', plantsHtml);
+        html += debugSection('Regional plants', ph);
       }
 
-      // Recommendations
       if (debugData.recommendations) {
         const r = debugData.recommendations;
-        html += debugSection('Recommendation LLM call', `
-          <div class="debug-label">System prompt</div>
-          <pre class="debug-pre">${esc(r.system_prompt)}</pre>
-          <div class="debug-label">User prompt</div>
-          <pre class="debug-pre">${esc(r.user_prompt)}</pre>
-          <div class="debug-label">Raw LLM response</div>
-          <pre class="debug-pre">${esc(r.raw_response)}</pre>
-        `);
+        html += debugSection('Recommendation LLM call',
+          '<div class="debug-label">System prompt</div><pre class="debug-pre">' + esc(r.system_prompt) + '</pre>'
+          + '<div class="debug-label">User prompt</div><pre class="debug-pre">' + esc(r.user_prompt) + '</pre>'
+          + '<div class="debug-label">Raw LLM response</div><pre class="debug-pre">' + esc(r.raw_response) + '</pre>');
       }
 
       debugContent.innerHTML = html;
 
-      // Wire up section toggles
       debugContent.querySelectorAll('.debug-section-header').forEach(header => {
         header.addEventListener('click', () => {
           header.classList.toggle('open');
@@ -749,14 +1615,22 @@
     }
 
     function debugSection(title, body) {
-      return `<div class="debug-section">
-        <div class="debug-section-header">
-          <h4>${title}</h4>
-          <span class="chevron">&#9654;</span>
-        </div>
-        <div class="debug-section-body">${body}</div>
-      </div>`;
+      return '<div class="debug-section">'
+        + '<div class="debug-section-header"><h4>' + title + '</h4><span class="chevron">&#9654;</span></div>'
+        + '<div class="debug-section-body">' + body + '</div>'
+        + '</div>';
     }
+
+    // Wire up "See all" button (delegated)
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'see-all-plants') {
+        const extra = document.getElementById('extra-plants');
+        if (extra) {
+          extra.style.display = 'block';
+          e.target.remove();
+        }
+      }
+    });
 
     function esc(s) {
       if (!s) return '';

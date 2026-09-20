@@ -33,13 +33,16 @@ Focus on flowers, shrubs, climbers, perennials and bulbs. Do NOT suggest vegetab
 You MUST return ONLY valid JSON matching this schema, with no other text:
 {{
   "week": "YYYY-WNN",
+  "summary": "One punchy sentence joining the weather forecast to the top gardening priority this week, max 120 characters. E.g. 'Seven mild, dry days on clay loam — the best bulb-planting window before the ground cools.'",
   "actions": [
     {{
       "priority": 1,
       "title": "Short action title",
       "detail": "Specific, actionable detail referencing weather and plants",
       "category": "weather-response|seasonal-planting|maintenance|pruning|pest-control|soil-care",
-      "urgent": true/false
+      "urgent": true/false,
+      "why_now": "One sentence explicitly connecting the forecast numbers to why this task matters this week",
+      "minutes": 20
     }}
   ],
   "inferences": [
@@ -50,7 +53,13 @@ You MUST return ONLY valid JSON matching this schema, with no other text:
       "reasoning": "why you inferred this"
     }}
   ],
-  "plant_suggestions": ["plant1", "plant2"],
+  "plant_suggestions": [
+    {{
+      "name": "Common name",
+      "latin": "Scientific name",
+      "note": "Short reason to plant now, e.g. 'Jan colour', 'Scent', 'Pollinator-friendly'"
+    }}
+  ],
   "notes": "Optional general observations"
 }}"""
 
