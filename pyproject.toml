@@ -11,4 +11,5 @@ dependencies = [
     "pydantic-settings",
     "python-dotenv",
     "jinja2",
+    "json-repair>=0.63.4",
 ]

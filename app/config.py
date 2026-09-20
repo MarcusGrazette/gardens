@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     llm_model: str = "llama3"
     llm_api_key: str = "ollama"
     met_office_api_key: str = ""
+    perenual_api_key: str = ""
+    trefle_api_key: str = ""
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

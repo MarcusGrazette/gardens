@@ -21,7 +21,8 @@ REGIONAL_PLANTS_SYSTEM = "You are an expert UK horticulturist specialising in or
 REGIONAL_PLANTS_USER = """List the 10 most popular ornamental plants grown in home gardens in {region} during {season}.
 Focus on flowers, shrubs, climbers and perennials typical of beds, borders, pots and containers.
 Do NOT include vegetables, crops or agricultural plants.
-Return ONLY a JSON array of objects: [{{"name": "...", "type": "flower|shrub|climber|perennial|bulb|tree"}}]
+Use specific common names (e.g. "English lavender" not "lavender", "Floribunda rose" not "rose").
+Return ONLY a JSON array of objects: [{{"name": "...", "latin": "...", "type": "flower|shrub|climber|perennial|bulb|tree"}}]
 No other text, just the JSON array."""
 
 

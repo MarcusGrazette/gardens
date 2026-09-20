@@ -3,34 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Garden Todo</title>
+  <title>This Week in the Garden</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #fafaf8;
+      --bg: #F4F4F4;
       --bg-card: #ffffff;
-      --text: #1a1a1a;
-      --text-muted: #6b7280;
-      --border: #e5e5e0;
-      --green-50: #f0fdf4;
-      --green-100: #dcfce7;
-      --green-600: #16a34a;
-      --green-700: #15803d;
-      --green-800: #166534;
-      --amber-50: #fffbeb;
-      --amber-600: #d97706;
+      --text: #594433;
+      --text-muted: #A68C69;
+      --border: #e0d8cd;
+      --accent: #9BA657;
+      --accent-dark: #7d8545;
+      --accent-bg: #f3f4e8;
+      --warm: #F0E5C9;
+      --warm-dark: #A68C69;
+      --brown: #594433;
+      --brown-light: #7a6350;
+      --amber-50: #fdf6e3;
       --amber-700: #b45309;
-      --blue-50: #eff6ff;
-      --blue-600: #2563eb;
-      --blue-700: #1d4ed8;
       --red-50: #fef2f2;
       --red-600: #dc2626;
-      --slate-50: #f8fafc;
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
+      --slate-50: #f8f7f5;
+      --slate-100: #f0ece6;
+      --slate-200: #e0d8cd;
+      --slate-600: #7a6350;
+      --slate-700: #594433;
+      --slate-800: #3d2e22;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,13 +49,21 @@
 
     header {
       text-align: center;
-      padding: 48px 0 32px;
+      padding: 0 0 32px;
+    }
+
+    .header-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
 
     header h1 {
       font-size: 1.75rem;
       font-weight: 700;
-      color: var(--green-800);
+      color: var(--brown);
       margin-bottom: 4px;
     }
 
@@ -88,14 +94,15 @@
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s;
+      color: var(--text);
     }
 
-    input[type="text"]:focus { border-color: var(--green-600); }
-    input[type="text"]::placeholder { color: #aaa; }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: #bbb; }
 
     button {
       padding: 12px 24px;
-      background: var(--green-700);
+      background: var(--accent);
       color: white;
       border: none;
       border-radius: 8px;
@@ -107,8 +114,8 @@
       white-space: nowrap;
     }
 
-    button:hover { background: var(--green-800); }
-    button:disabled { background: #aaa; cursor: not-allowed; }
+    button:hover { background: var(--accent-dark); }
+    button:disabled { background: #bbb; cursor: not-allowed; }
 
     /* Progress */
     #progress { display: none; margin-bottom: 24px; }
@@ -123,7 +130,7 @@
 
     .progress-bar-track {
       height: 6px;
-      background: #e5e7eb;
+      background: var(--warm);
       border-radius: 3px;
       margin-bottom: 20px;
       overflow: hidden;
@@ -131,7 +138,7 @@
 
     .progress-bar-fill {
       height: 100%;
-      background: var(--green-600);
+      background: var(--accent);
       border-radius: 3px;
       width: 0%;
       transition: width 0.4s ease;
@@ -157,14 +164,14 @@
       justify-content: center;
     }
 
-    .steps li.done { color: var(--green-700); }
+    .steps li.done { color: var(--accent-dark); }
     .steps li.active { color: var(--text); font-weight: 500; }
 
     .spinner {
       width: 16px;
       height: 16px;
-      border: 2px solid #e5e7eb;
-      border-top-color: var(--green-600);
+      border: 2px solid var(--warm);
+      border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
@@ -185,7 +192,7 @@
     .results-header h2 {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--green-800);
+      color: var(--brown);
     }
 
     .results-header .week {
@@ -197,11 +204,35 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 16px 20px;
       margin-bottom: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
     }
 
-    .action-card.urgent { border-left: 3px solid var(--amber-600); }
+    .action-card:hover {
+      box-shadow: 0 2px 8px rgba(89, 68, 51, 0.08);
+    }
+
+    .action-card.urgent { border-left: 3px solid var(--amber-700); }
+
+    .action-body {
+      display: flex;
+    }
+
+    .action-thumb {
+      width: 100px;
+      min-height: 100%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--warm);
+      display: block;
+    }
+
+    .action-content {
+      flex: 1;
+      min-width: 0;
+      padding: 16px 20px;
+    }
 
     .action-top {
       display: flex;
@@ -212,6 +243,11 @@
     }
 
     .action-title { font-weight: 600; font-size: 0.95rem; }
+
+    .plant-name {
+      border-bottom: 1px dotted var(--text-muted);
+      cursor: help;
+    }
 
     .badge {
       display: inline-block;
@@ -226,7 +262,7 @@
     }
 
     .badge-urgent { background: var(--amber-50); color: var(--amber-700); }
-    .badge-category { background: var(--green-50); color: var(--green-700); }
+    .badge-category { background: var(--accent-bg); color: var(--accent-dark); }
 
     .action-detail {
       font-size: 0.88rem;
@@ -238,7 +274,7 @@
       font-size: 0.75rem;
       font-weight: 700;
       color: white;
-      background: var(--green-600);
+      background: var(--accent);
       width: 22px;
       height: 22px;
       border-radius: 50%;
@@ -281,8 +317,8 @@
     .plant-list { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .plant-tag {
-      background: var(--green-50);
-      color: var(--green-700);
+      background: var(--accent-bg);
+      color: var(--accent-dark);
       padding: 4px 12px;
       border-radius: 999px;
       font-size: 0.82rem;
@@ -398,7 +434,8 @@
 <body>
   <div class="container">
     <header>
-      <h1>Garden Todo</h1>
+      <img class="header-img" src="/static/Gemini_Generated_Image_4qteie4qteie4qte.jpg" alt="">
+      <h1>This Week in the Garden</h1>
       <p>Personalised gardening actions for your week</p>
     </header>
 
@@ -539,8 +576,49 @@
       });
     });
 
+    function buildPlantLookup(plants) {
+      const lookup = {};
+      if (!plants) return lookup;
+      for (const p of plants) {
+        const key = p.name.toLowerCase();
+        lookup[key] = {
+          thumbnail: p.image_url || p.medium_url || p.regular_url || p.thumbnail || null,
+          latin: p.scientific_name || p.latin || null,
+          common_name: p.common_name || p.name,
+        };
+      }
+      return lookup;
+    }
+
+    function findPlantImage(text, plantLookup) {
+      const lower = text.toLowerCase();
+      const matches = [];
+      for (const [key, plant] of Object.entries(plantLookup)) {
+        const pos = lower.indexOf(key);
+        if (pos !== -1) matches.push({ pos, plant });
+      }
+      matches.sort((a, b) => a.pos - b.pos);
+      for (const m of matches) {
+        if (m.plant.thumbnail) return m.plant;
+      }
+      return null;
+    }
+
+    function annotatePlantNames(text, plantLookup) {
+      let annotated = esc(text);
+      const entries = Object.entries(plantLookup)
+        .filter(([, p]) => p.latin)
+        .sort((a, b) => b[0].length - a[0].length);
+      for (const [key, plant] of entries) {
+        const re = new RegExp(`(?<![\\w-])(${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![\\w-])`, 'gi');
+        annotated = annotated.replace(re, `<span class="plant-name" title="${esc(plant.latin)}">$1</span>`);
+      }
+      return annotated;
+    }
+
     function renderResults(data) {
       resultsEl.classList.add('active');
+      const plantLookup = buildPlantLookup(data.regional_plants);
       let html = '';
 
       html += `<div class="results-header">
@@ -554,13 +632,26 @@
           const urgentBadge = action.urgent ? '<span class="badge badge-urgent">Urgent</span>' : '';
           const categoryBadge = action.category ? `<span class="badge badge-category">${action.category.replace(/-/g, ' ')}</span>` : '';
 
+          const matched = findPlantImage(action.title + ' ' + action.detail, plantLookup);
+          const thumbHtml = matched && matched.thumbnail
+            ? `<img class="action-thumb" src="${matched.thumbnail}" alt="">`
+            : '';
+
+          const titleHtml = annotatePlantNames(action.title, plantLookup);
+          const detailHtml = annotatePlantNames(action.detail, plantLookup);
+
           html += `<div class="action-card${urgentClass}">
-            <div class="action-top">
-              <div class="action-title"><span class="priority-num">${action.priority}</span>${action.title}</div>
-              <div>${urgentBadge}</div>
+            <div class="action-body">
+              ${thumbHtml}
+              <div class="action-content">
+                <div class="action-top">
+                  <div class="action-title"><span class="priority-num">${action.priority}</span>${titleHtml}</div>
+                  <div>${urgentBadge}</div>
+                </div>
+                <div class="action-detail">${detailHtml}</div>
+                <div style="margin-top: 6px">${categoryBadge}</div>
+              </div>
             </div>
-            <div class="action-detail">${action.detail}</div>
-            <div style="margin-top: 8px">${categoryBadge}</div>
           </div>`;
         }
       }
@@ -580,7 +671,9 @@
       if (data.plant_suggestions && data.plant_suggestions.length > 0) {
         html += `<div class="section-card"><h3>Plant suggestions</h3><div class="plant-list">`;
         for (const p of data.plant_suggestions) {
-          html += `<span class="plant-tag">${p}</span>`;
+          const match = plantLookup[p.toLowerCase()];
+          const tooltip = match && match.latin ? ` title="${esc(match.latin)}"` : '';
+          html += `<span class="plant-tag"${tooltip}>${esc(p)}</span>`;
         }
         html += `</div></div>`;
       }

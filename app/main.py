@@ -4,9 +4,10 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.cache import get_regional_plants
+from app.cache import get_regional_plants, _enrich_plant
 from app.geocode import geocode_postcode
 from app.models import RecommendationRequest, RecommendationResponse
 from app.prompts import (
@@ -18,7 +19,49 @@ from app.prompts import (
 from app.llm import generate_json
 from app.weather import fetch_forecast, summarise_forecast
 
-app = FastAPI(title="Garden Todo")
+import re
+
+CACHE_DIR = Path(__file__).parent.parent / ".cache"
+
+COMMON_PLANTS = {
+    "tulip", "daffodil", "crocus", "allium", "snowdrop", "hyacinth",
+    "bluebell", "iris", "lily", "peony", "dahlia", "geranium", "fuchsia",
+    "cyclamen", "lavender", "heather", "clematis", "wisteria", "jasmine",
+    "hydrangea", "camellia", "magnolia", "azalea", "rhododendron", "rose",
+    "foxglove", "lupin", "delphinium", "hollyhock", "sunflower", "pansy",
+    "primrose", "viola", "aster", "verbena", "salvia", "cosmos",
+}
+
+
+def _extract_extra_plants(actions: list[dict], known: set[str]) -> list[str]:
+    """Find plant names in action text not already in the known set."""
+    text = " ".join(a.get("title", "") + " " + a.get("detail", "") for a in actions)
+    candidates = set()
+    for word in re.findall(r"\b[A-Za-z][a-z]{2,}\b", text):
+        if word.lower() in COMMON_PLANTS and word.lower() not in known:
+            candidates.add(word.lower())
+    return list(candidates)
+
+
+def _recs_cache_path(postcode: str, week: str) -> Path:
+    CACHE_DIR.mkdir(exist_ok=True)
+    safe_key = f"{postcode}_{week}".lower().replace(" ", "_")
+    return CACHE_DIR / f"recs_{safe_key}.json"
+
+
+def get_cached_recs(postcode: str, week: str) -> dict | None:
+    path = _recs_cache_path(postcode, week)
+    if path.exists():
+        return json.loads(path.read_text())
+    return None
+
+
+def save_cached_recs(postcode: str, week: str, data: dict) -> None:
+    path = _recs_cache_path(postcode, week)
+    path.write_text(json.dumps(data, indent=2))
+
+app = FastAPI(title="This Week in the Garden")
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
 
 
@@ -39,6 +82,16 @@ def _sse(event: str, data: dict) -> str:
 @app.get("/recommendations/stream")
 async def recommendations_stream(postcode: str):
     async def generate():
+        today = date.today()
+        week = today.strftime("%G-W%V")
+
+        # Check recommendation cache
+        cached_recs = get_cached_recs(postcode, week)
+        if cached_recs is not None:
+            yield _sse("step", {"step": 6, "label": "Loaded from cache"})
+            yield _sse("done", cached_recs)
+            return
+
         # 1. Validate + geocode
         yield _sse("step", {"step": 0, "label": "Validating postcode..."})
         try:
@@ -93,12 +146,11 @@ async def recommendations_stream(postcode: str):
 
         # 4. Generate recommendations
         yield _sse("step", {"step": 6, "label": "Generating your garden plan..."})
-        today = date.today()
         user_prompt = RECOMMENDATIONS_USER.format(
             postcode=geo.postcode,
             region=geo.region,
             date=today.isoformat(),
-            week=today.strftime("%G-W%V"),
+            week=week,
             season=current_season(),
             forecast=forecast,
             plants=plants_str,
@@ -117,6 +169,22 @@ async def recommendations_stream(postcode: str):
                 "raw_response": raw_response,
             },
         })
+        # 5. Enrich any extra plants mentioned in actions but not in regional list
+        all_plants = list(plant_result.plants)
+        known_names = {p["name"].lower() for p in all_plants}
+        extra_names = _extract_extra_plants(result.get("actions", []), known_names)
+        for s in result.get("plant_suggestions", []):
+            if s.lower() not in known_names and s.lower() not in extra_names:
+                extra_names.append(s.lower())
+        if extra_names:
+            import asyncio
+            extras = await asyncio.gather(*[
+                _enrich_plant({"name": n}) for n in extra_names
+            ])
+            all_plants.extend([e for e in extras if e.get("image_url")])
+
+        result["regional_plants"] = all_plants
+        save_cached_recs(postcode, week, result)
         yield _sse("done", result)
 
     return StreamingResponse(generate(), media_type="text/event-stream")
